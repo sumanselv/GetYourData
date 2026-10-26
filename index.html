@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Match 10, Claim 1 GB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: two columns on desktop. Left = the offer, the data meter and the rules. Right = the card board.
+   The claim form opens below once the board is cleared. Single column on phones. */
+:root{
+  --bg:#F2F5FA; --surface:#FFFFFF; --ink:#0E1726; --muted:#4A5873; --line:#D5DDEA;
+  --accent:#2B45F5; --accent-ink:#FFFFFF; --signal:#E89A00; --good:#0E8A5F; --bad:#C93B3B;
+  --card-back:#2076cc;
+  --display:'Unbounded', 'Arial Black', system-ui, sans-serif;
+  --body:'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
+    --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
+    --card-back:#FF9A2E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
+  --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
+  --card-back:#FF9A2E; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body)}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+.setup{background:var(--signal);color:#1b1300;padding:10px 14px;border-radius:10px;font-size:14px;margin-bottom:16px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:28px}
+.brand{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.02em}
+.top a{font-size:14px;color:var(--muted)}
+
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:48px;align-items:start}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.4vw,46px);line-height:1.08;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lede{font-size:18px;color:var(--muted);max-width:52ch;margin:0 0 28px}
+
+.meter{margin:0 0 28px}
+.meter-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.meter-read{font-family:var(--mono);font-size:15px;color:var(--ink);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
+.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.seg{height:16px;border-radius:3px;background:var(--line);transition:background .25s}
+.seg.on{background:var(--signal)}
+.meter-note{font-size:13px;color:var(--muted);margin:10px 0 0}
+
+dl.rules{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;margin:0;padding:18px 0 0;border-top:1px solid var(--line);font-size:15px}
+dl.rules dt{color:var(--muted)}
+dl.rules dd{margin:0;font-weight:600}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.chip{font-family:var(--mono);font-size:15px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip b{font-weight:500;color:var(--muted);margin-right:6px;font-family:var(--body);font-size:12px;text-transform:uppercase;letter-spacing:.07em}
+.chip.low{border-color:var(--bad);color:var(--bad)}
+.spacer{flex:1}
+.btn{font:600 15px/1 var(--body);border:0;border-radius:10px;padding:13px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:9px 14px;font-size:14px}
+.btn[disabled]{opacity:.6;cursor:progress}
+
+.boardwrap{position:relative}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.card{position:relative;aspect-ratio:1/1;padding:0;border:0;background:none;perspective:600px;cursor:pointer;min-width:0}
+.inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .32s ease}
+.card.flipped .inner,.card.matched .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
+.back{background:var(--card-back)}
+.front{transform:rotateY(180deg);background:var(--bg);border:2px solid var(--line)}
+.front svg{width:64%;height:64%;fill:currentColor}
+.card.matched .front{border-color:var(--good)}
+.card:disabled{cursor:default}
+.s0{color:var(--accent)}.s1{color:var(--signal)}.s2{color:var(--good)}.s3{color:var(--bad)}.s4{color:var(--ink)}
+
+.overlay{position:absolute;inset:0;border-radius:12px;background:color-mix(in srgb,var(--surface) 93%,transparent);display:grid;place-content:center;gap:14px;text-align:center;padding:20px}
+.overlay p{margin:0;font-size:18px;font-weight:600}
+.status{min-height:1.6em;margin:12px 2px 0;font-size:14px;color:var(--muted)}
+
+.claim{margin-top:56px;padding-top:36px;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:48px;align-items:start}
+.claim h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.15;letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+.claim h2:focus{outline:none}
+.claim p{color:var(--muted);margin:0 0 16px;max-width:52ch}
+ul.use{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:15px}
+ul.use li{padding-left:0}
+ul.use b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+
+form{display:grid;gap:18px}
+label.field{display:grid;gap:6px;font-weight:600;font-size:15px}
+.input-row{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
+.input-row:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.prefix{display:grid;place-items:center;padding:0 12px;font-family:var(--mono);color:var(--muted);border-right:1px solid var(--line)}
+input[type=tel],select{font:inherit;color:var(--ink);background:var(--bg);border:0;padding:13px 12px;width:100%;min-width:0}
+input[type=tel]{font-family:var(--mono);letter-spacing:.06em;outline:none}
+select.solo{border:1px solid var(--line);border-radius:10px}
+.hint{font-weight:400;font-size:13px;color:var(--muted)}
+.consent{display:grid;grid-template-columns:22px 1fr;gap:12px;font-size:14px;color:var(--muted);line-height:1.5}
+.consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
+.err{color:var(--bad);font-size:14px;min-height:1.4em;margin:0}
+.fine{font-size:13px;color:var(--muted);margin:0}
+.done{display:grid;gap:12px}
+.done .tick{width:44px;height:44px;border-radius:50%;background:var(--good);display:grid;place-items:center}
+.done .tick svg{width:22px;height:22px;stroke:var(--bg);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px;max-width:70ch}
+
+.ad{margin:0 0 32px}
+.ad-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
+.ad-box{min-height:90px;max-width:100%;overflow:hidden;border-radius:10px}
+.ad:not(:has(.ad-box > *)){display:none}
+body{overflow-wrap:break-word}
+.hero>*,.claim>*{min-width:0}
+.ad-box{display:flex;justify-content:center}
+
+/* Large desktops and wide monitors */
+@media (min-width:1400px){
+  body{font-size:18px}
+  .wrap{max-width:1240px}
+  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:64px}
+}
+/* Small laptops and landscape tablets */
+@media (min-width:821px) and (max-width:1100px){
+  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:32px}
+}
+/* Tablets and phones: one column, game and form capped to a comfortable width */
+@media (max-width:820px){
+  .hero,.claim{grid-template-columns:minmax(0,1fr);gap:32px}
+  .hero>div:last-child,.claim>.panel{width:100%;max-width:520px;margin-inline:auto}
+  .lede{font-size:17px}
+}
+/* Phones in landscape: keep two columns so the board does not push everything off screen */
+@media (orientation:landscape) and (max-height:520px) and (min-width:640px){
+  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:24px}
+  .hero>div:last-child,.claim>.panel{max-width:none;margin-inline:0}
+}
+/* Phones */
+@media (max-width:480px){
+  .wrap{padding-block:14px 40px}
+  .top{padding-bottom:18px}
+  .hero{gap:24px}
+  .lede{font-size:16px;margin-bottom:22px}
+  .panel{padding:12px;border-radius:14px}
+  .board{gap:6px}
+  .face{border-radius:10px}
+  .bar{gap:8px}
+  .chip{font-size:14px;padding:5px 10px}
+  .claim{margin-top:40px;padding-top:28px}
+  footer{margin-top:40px}
+  dl.rules{grid-template-columns:1fr;gap:2px}
+  dl.rules dd{margin-bottom:10px}
+  .btn{width:100%}
+  .btn.ghost{width:auto}
+}
+/* Very small phones */
+@media (max-width:360px){
+  .board{gap:5px}
+  .chip b{display:none}
+  .segs{gap:3px}
+  .seg{height:12px}
+  .meter-head{flex-wrap:wrap}
+}
+/* Touch screens: larger tap targets */
+@media (pointer:coarse){
+  .btn{min-height:48px}
+  .btn.ghost{min-height:44px}
+  input[type=tel],select{min-height:48px}
+  .consent{grid-template-columns:28px 1fr}
+  .consent input{width:24px;height:24px}
+  .top a{padding:10px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  .inner,.seg{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="setup" class="setup" hidden></div>
+
+  <header class="top">
+    <span class="brand" data-cfg="BRAND">GetYourData</span>
+    <a href="#terms">Offer terms</a>
+  </header>
+
+  <!-- Ad slot: paste your ad network code inside .ad-box. The slot stays hidden until you do.
+       Keep it here, away from the game board, so players never tap an ad by accident. -->
+  <aside class="ad" aria-label="Advertisement">
+    <span class="ad-label">Advertisement</span>
+    <div class="ad-box" id="adSlot">
+      <!-- PASTE AD CODE HERE -->
+    </div>
+  </aside>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1>Match 10 pairs in 75 seconds. Claim 1 GB of mobile data.</h1>
+        <p class="lede">Clear the board before the timer runs out, then enter your mobile number and operator. The data is added to your number after your claim is checked, within <span data-cfg="DELIVERY">the delivery window</span>.</p>
+
+        <div class="meter" aria-label="Challenge progress">
+          <div class="meter-head"><span>Challenge progress</span><span class="meter-read" id="meterRead">0 MB / 1024 MB</span></div>
+          <div class="segs" id="segs"></div>
+          <p class="meter-note">The meter shows how far you are in the game. The data is added only after you submit the claim form.</p>
+        </div>
+
+        <dl class="rules">
+          <dt>Time limit</dt><dd>75 seconds, starts on your first flip</dd>
+          <dt>To win</dt><dd>Match all 10 pairs</dd>
+          <dt>Reward</dt><dd data-cfg="REWARD">1 GB of mobile data</dd>
+          <dt>Limit</dt><dd>One claim per mobile number</dd>
+          <dt>Funded by</dt><dd data-cfg="FUNDING">Ads shown on this site</dd>
+        </dl>
+      </div>
+
+      <div>
+        <div class="panel">
+          <div class="bar">
+            <span class="chip" id="timeChip"><b>Time</b><span id="time">1:15</span></span>
+            <span class="chip"><b>Moves</b><span id="moves">0</span></span>
+            <span class="spacer"></span>
+            <button class="btn ghost" type="button" id="restart">Restart</button>
+          </div>
+          <div class="boardwrap">
+            <div class="board" id="board" role="group" aria-label="Memory card board, 20 cards"></div>
+            <div class="overlay" id="lost" hidden>
+              <p id="lostText">Time is up.</p>
+              <button class="btn" type="button" id="retry">Try again</button>
+            </div>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite">Flip any card to start the timer.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="claim" id="claim" hidden>
+      <div>
+        <h2 id="claimTitle" tabindex="-1">You cleared the board. Claim your data.</h2>
+        <p id="winLine"></p>
+        <ul class="use">
+          <li><b>What we collect</b>Your mobile number and your operator. Nothing else.</li>
+          <li><b>What we use it for</b><span data-cfg="USE_STATEMENT">To add the data to your number and to contact you about this claim.</span></li>
+          <li><b>How long we keep it</b><span data-cfg="RETENTION">90 days after delivery</span></li>
+          <li><b>Questions or deletion</b><span data-cfg="CONTACT">support@example.com</span></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <form id="claimForm" novalidate>
+          <input type="checkbox" name="botcheck" id="botcheck" tabindex="-1" autocomplete="off" style="display:none">
+
+          <label class="field" for="mobile">Mobile number
+            <span class="hint">10 digits, the number that should receive the data</span>
+            <span class="input-row"><span class="prefix">+91</span><input id="mobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" maxlength="16" required></span>
+          </label>
+
+          <label class="field" for="operator">Network operator
+            <select id="operator" name="operator" class="solo" required>
+              <option value="" selected disabled>Choose your operator</option>
+              <option>Jio</option>
+              <option>Airtel</option>
+              <option>Vi (Vodafone Idea)</option>
+              <option>BSNL</option>
+              <option>MTNL</option>
+            </select>
+          </label>
+
+          <label class="consent" for="consent">
+            <input id="consent" name="consent" type="checkbox" required>
+            <span data-cfg="CONSENT_TEXT">I agree to the use of my number and operator as described here.</span>
+          </label>
+
+          <p class="err" id="err" role="alert"></p>
+          <button class="btn" type="submit" id="submitBtn">Claim 1 GB</button>
+          <p class="fine"><span data-cfg="AFFILIATION_NOTE"></span></p>
+        </form>
+
+        <div class="done" id="done" hidden>
+          <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+          <h2 style="margin:0">Claim received</h2>
+          <p id="doneText" style="margin:0"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="terms">
+    <strong>Offer terms</strong>
+    <span data-cfg="TERMS">One claim per mobile number. Claims are checked before the data is added. The offer can end without notice.</span>
+    <span data-cfg="AFFILIATION_NOTE"></span>
+  </footer>
+</div>
+
+<script>
+/* ===== Edit this block before you publish ===== */
+const CONFIG = {
+  ACCESS_KEY: 'YOUR_WEB3FORMS_ACCESS_KEY',   // from web3forms.com, public by design
+  BRAND: 'Your Brand',
+  REWARD: '1 GB of mobile data',
+  FUNDING: 'Ads shown on this site. Ad income pays for the data rewards.',
+  DELIVERY: '48 hours',                       // must match what you can actually deliver
+  USE_STATEMENT: 'To add the data to your number and to contact you about this claim. We do not sell your details or use them for marketing.',
+  RETENTION: '90 days after delivery',
+  CONTACT: 'support@example.com',
+  CONSENT_TEXT: 'I agree that Your Brand may use my mobile number and operator only to deliver this reward and to contact me about my claim.',
+  AFFILIATION_NOTE: 'Your Brand is not a mobile operator. Operator names are listed only so the data can be sent to the right network.',
+  TERMS: 'One claim per mobile number. Claims are checked before the data is added. The offer can end without notice.'
+};
+/* =============================================== */
+
+const GAME = { PAIRS: 10, SECONDS: 75, FLIP_BACK_MS: 700 };
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+document.querySelectorAll('[data-cfg]').forEach(el => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
+if (CONFIG.ACCESS_KEY.startsWith('YOUR_') || CONFIG.BRAND === 'Your Brand') {
+  const s = document.getElementById('setup');
+  s.hidden = false;
+  s.textContent = 'Setup needed: replace the placeholder values in the CONFIG block of this file (Web3Forms access key, brand, contact, delivery time) before you publish.';
+}
+
+/* ---- symbols: 10 distinct shapes ---- */
+const SHAPES = [
+  '<circle cx="24" cy="24" r="15"/>',
+  '<path d="M24 7 L43 39 H5Z"/>',
+  '<rect x="9" y="9" width="30" height="30" rx="4"/>',
+  '<path d="M24 5 L43 24 L24 43 L5 24Z"/>',
+  '<path d="M24 5 L29.7 18.2 L44 19.4 L33.1 28.8 L36.4 42.7 L24 35.3 L11.6 42.7 L14.9 28.8 L4 19.4 L18.3 18.2Z"/>',
+  '<path d="M18 6h12v12h12v12H30v12H18V30H6V18h12z"/>',
+  '<path d="M24 5 L41 14.5 V33.5 L24 43 L7 33.5 V14.5Z"/>',
+  '<path d="M31 6 A18 18 0 1 0 42 31 A14 14 0 1 1 31 6Z"/>',
+  '<path fill-rule="evenodd" d="M24 6a18 18 0 1 0 0 36a18 18 0 1 0 0-36zM24 15a9 9 0 1 1 0 18a9 9 0 1 1 0-18z"/>',
+  '<path d="M28 4 L9 27 H21 L18 44 L39 20 H27Z"/>'
+];
+const NAMES = ['circle','triangle','square','diamond','star','plus','hexagon','crescent','ring','bolt'];
+
+const $ = id => document.getElementById(id);
+const boardEl = $('board'), timeEl = $('time'), movesEl = $('moves'), statusEl = $('status');
+const segsEl = $('segs'), meterRead = $('meterRead'), lostEl = $('lost');
+
+for (let i = 0; i < GAME.PAIRS; i++) { const d = document.createElement('div'); d.className = 'seg'; segsEl.appendChild(d); }
+
+let deck, first, second, locked, matched, moves, started, remaining, timer, won = false, winSeconds = 0;
+
+function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+
+function setup(){
+  clearInterval(timer);
+  deck = shuffle([...Array(GAME.PAIRS).keys(), ...Array(GAME.PAIRS).keys()]);
+  first = second = null; locked = false; matched = 0; moves = 0; started = false; remaining = GAME.SECONDS;
+  lostEl.hidden = true;
+  movesEl.textContent = '0'; timeEl.textContent = fmt(remaining); $('timeChip').classList.remove('low');
+  statusEl.textContent = 'Flip any card to start the timer.';
+  updateMeter();
+  boardEl.innerHTML = '';
+  deck.forEach((v, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'card'; b.dataset.i = i; b.dataset.v = v;
+    b.setAttribute('aria-label', 'Card ' + (i+1) + ', face down');
+    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front s' + (v%5) + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + SHAPES[v] + '</svg></span></span>';
+    b.addEventListener('click', () => flip(b));
+    boardEl.appendChild(b);
+  });
+}
+
+function updateMeter(){
+  [...segsEl.children].forEach((s, i) => s.classList.toggle('on', i < matched));
+  meterRead.textContent = Math.round(matched * 1024 / GAME.PAIRS) + ' MB / 1024 MB';
+}
+
+function startTimer(){
+  started = true;
+  timer = setInterval(() => {
+    remaining--;
+    timeEl.textContent = fmt(remaining);
+    $('timeChip').classList.toggle('low', remaining <= 10);
+    if (remaining <= 0) lose();
+  }, 1000);
+}
+
+function reveal(b, on){
+  b.classList.toggle('flipped', on);
+  b.setAttribute('aria-label', on ? 'Card ' + (+b.dataset.i+1) + ', ' + NAMES[b.dataset.v] : 'Card ' + (+b.dataset.i+1) + ', face down');
+}
+
+function flip(b){
+  if (locked || won || b.classList.contains('flipped') || b.classList.contains('matched') || remaining <= 0) return;
+  if (!started) startTimer();
+  reveal(b, true);
+  if (!first) { first = b; return; }
+  second = b; moves++; movesEl.textContent = moves; locked = true;
+  if (first.dataset.v === second.dataset.v) {
+    [first, second].forEach(c => { c.classList.add('matched'); c.disabled = true; c.setAttribute('aria-label', 'Matched ' + NAMES[c.dataset.v]); });
+    matched++; updateMeter();
+    first = second = null; locked = false;
+    statusEl.textContent = matched + ' of ' + GAME.PAIRS + ' pairs matched.';
+    if (matched === GAME.PAIRS) win();
+  } else {
+    setTimeout(() => { reveal(first, false); reveal(second, false); first = second = null; locked = false; }, reduce ? 450 : GAME.FLIP_BACK_MS);
+  }
+}
+
+function lose(){
+  clearInterval(timer); locked = true;
+  $('lostText').textContent = 'Time is up. You matched ' + matched + ' of ' + GAME.PAIRS + ' pairs.';
+  lostEl.hidden = false; $('retry').focus();
+  statusEl.textContent = 'Time is up.';
+}
+
+function win(){
+  clearInterval(timer); won = true; locked = true;
+  winSeconds = GAME.SECONDS - remaining;
+  statusEl.textContent = 'Board cleared in ' + winSeconds + ' seconds with ' + moves + ' moves.';
+  $('winLine').textContent = 'Cleared in ' + winSeconds + ' seconds with ' + moves + ' moves. Enter the number that should receive the data.';
+  const sec = $('claim'); sec.hidden = false;
+  setTimeout(() => {
+    sec.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    $('claimTitle').focus({ preventScroll: true });
+  }, reduce ? 0 : 500);
+}
+
+$('restart').addEventListener('click', () => { if (!won) setup(); });
+$('retry').addEventListener('click', setup);
+
+/* ---- claim form ---- */
+function normaliseMobile(raw){
+  let d = String(raw).replace(/\D/g, '');
+  if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
+  else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+  return d;
+}
+
+$('claimForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('err'); err.textContent = '';
+  if (!won) { err.textContent = 'Clear the board first.'; return; }
+  if ($('botcheck').checked) return;
+
+  const mobile = normaliseMobile($('mobile').value);
+  const operator = $('operator').value;
+  if (!/^[6-9]\d{9}$/.test(mobile)) { err.textContent = 'Enter a valid 10-digit Indian mobile number that starts with 6, 7, 8 or 9.'; $('mobile').focus(); return; }
+  if (!operator) { err.textContent = 'Choose your network operator.'; $('operator').focus(); return; }
+  if (!$('consent').checked) { err.textContent = 'Tick the box to confirm how your details will be used.'; $('consent').focus(); return; }
+  if (CONFIG.ACCESS_KEY.startsWith('YOUR_')) { err.textContent = 'This form is not connected yet. The site owner needs to add a Web3Forms access key.'; return; }
+
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: CONFIG.ACCESS_KEY,
+        subject: 'New data claim: +91 ' + mobile + ' (' + operator + ')',
+        from_name: CONFIG.BRAND + ' claim form',
+        mobile_number: '+91' + mobile,
+        operator: operator,
+        consent: 'Agreed: ' + CONFIG.CONSENT_TEXT,
+        game_seconds: winSeconds,
+        game_moves: moves,
+        submitted_at: new Date().toISOString()
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
+    $('claimForm').hidden = true;
+    $('doneText').textContent = 'We have your claim for the number ending ' + mobile.slice(-4) + ' on ' + operator + '. The data is added after the claim is checked, within ' + CONFIG.DELIVERY + '.';
+    $('done').hidden = false;
+    $('done').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+  } catch (ex) {
+    err.textContent = 'The claim did not go through. Check your connection and try again.';
+    btn.disabled = false; btn.textContent = 'Claim 1 GB';
+  }
+});
+
+setup();
+</script>
+</body>
+</html>
