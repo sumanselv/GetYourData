@@ -386,9 +386,30 @@ if (CONFIG.ACCESS_KEY.startsWith('YOUR_') || CONFIG.BRAND === 'Your Brand') {
   s.textContent = 'Setup needed: replace the placeholder values in the CONFIG block of this file (Web3Forms access key, brand, contact, delivery time) before you publish.';
 }
 
-/* ---- the 10 pictures behind the cards: flowers, animals, fruit and more ---- */
-const EMOJIS = ['🌸','🌻','🌹','🐶','🐱','🦋','🐼','🐢','🍓','🚀'];
-const NAMES = ['cherry blossom','sunflower','rose','dog','cat','butterfly','panda','turtle','strawberry','rocket'];
+/* ---- pictures behind the cards ----
+   Every new board picks 10 different pictures at random from this pool:
+   flowers, animals, tools, everyday things, food and a few extras.
+   Add or remove lines freely (keep at least 10). Each line is [emoji, name for screen readers]. */
+const POOL = [
+  // flowers and plants
+  ['🌸','cherry blossom'],['🌻','sunflower'],['🌹','rose'],['🌷','tulip'],['🌼','daisy'],['🌵','cactus'],
+  // animals
+  ['🐶','dog'],['🐱','cat'],['🦋','butterfly'],['🐼','panda'],['🐢','turtle'],['🐘','elephant'],['🦁','lion'],
+  ['🐸','frog'],['🐧','penguin'],['🐙','octopus'],['🐝','bee'],['🦊','fox'],['🐠','fish'],
+  // tools
+  ['🔨','hammer'],['🔧','wrench'],['✂️','scissors'],['🔦','flashlight'],['🧰','toolbox'],['📏','ruler'],
+  ['🔑','key'],['🔒','lock'],['⚙️','gear'],['🧲','magnet'],['🪓','axe'],['🔩','nut and bolt'],
+  // everyday things
+  ['☕','coffee'],['📱','phone'],['💡','light bulb'],['⏰','alarm clock'],['🎒','backpack'],['👓','glasses'],
+  ['📚','books'],['🚲','bicycle'],['🛒','shopping cart'],['🔔','bell'],['🎧','headphones'],['📎','paperclip'],
+  ['🧹','broom'],['🧦','socks'],['🪑','chair'],['🕯️','candle'],
+  // food
+  ['🍓','strawberry'],['🍎','apple'],['🍌','banana'],['🍕','pizza'],['🍪','cookie'],['🥕','carrot'],
+  ['🍉','watermelon'],['🍩','donut'],
+  // extras
+  ['🚀','rocket'],['🌈','rainbow'],['⚽','football'],['🎈','balloon']
+];
+let faces = [];
 
 const $ = id => document.getElementById(id);
 const boardEl = $('board'), timeEl = $('time'), movesEl = $('moves'), statusEl = $('status');
@@ -403,6 +424,7 @@ function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 
 function setup(){
   clearInterval(timer);
+  faces = shuffle(POOL.slice()).slice(0, GAME.PAIRS);
   deck = shuffle([...Array(GAME.PAIRS).keys(), ...Array(GAME.PAIRS).keys()]);
   first = second = null; locked = false; matched = 0; moves = 0; started = false; remaining = GAME.SECONDS;
   lostEl.hidden = true;
@@ -414,7 +436,7 @@ function setup(){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'card'; b.dataset.i = i; b.dataset.v = v;
     b.setAttribute('aria-label', 'Card ' + (i+1) + ', face down');
-    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front"><span class="emoji" aria-hidden="true">' + EMOJIS[v] + '</span></span></span>';
+    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front"><span class="emoji" aria-hidden="true">' + faces[v][0] + '</span></span></span>';
     b.addEventListener('click', () => flip(b));
     boardEl.appendChild(b);
   });
@@ -452,7 +474,7 @@ function startTimer(){
 
 function reveal(b, on){
   b.classList.toggle('flipped', on);
-  b.setAttribute('aria-label', on ? 'Card ' + (+b.dataset.i+1) + ', ' + NAMES[b.dataset.v] : 'Card ' + (+b.dataset.i+1) + ', face down');
+  b.setAttribute('aria-label', on ? 'Card ' + (+b.dataset.i+1) + ', ' + faces[b.dataset.v][1] :'Card ' + (+b.dataset.i+1) + ', face down');
 }
 
 function flip(b){
@@ -462,7 +484,7 @@ function flip(b){
   if (!first) { first = b; return; }
   second = b; moves++; movesEl.textContent = moves; locked = true;
   if (first.dataset.v === second.dataset.v) {
-    [first, second].forEach(c => { c.classList.add('matched'); c.disabled = true; c.setAttribute('aria-label', 'Matched ' + NAMES[c.dataset.v]); });
+    [first, second].forEach(c => { c.classList.add('matched'); c.disabled = true; c.setAttribute('aria-label', 'Matched ' + faces[c.dataset.v][1]); });
     matched++; updateMeter();
     first = second = null; locked = false;
     statusEl.textContent = matched + ' of ' + GAME.PAIRS + ' pairs matched.';
