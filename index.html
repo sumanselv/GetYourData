@@ -13,7 +13,7 @@
 :root{
   --bg:#F2F5FA; --surface:#FFFFFF; --ink:#0E1726; --muted:#4A5873; --line:#D5DDEA;
   --accent:#2B45F5; --accent-ink:#FFFFFF; --signal:#E89A00; --good:#0E8A5F; --bad:#C93B3B;
-  --card-back:#2076cc;
+  --card-back:#F28A1A;
   --display:'Unbounded', 'Arial Black', system-ui, sans-serif;
   --body:'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -54,6 +54,7 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.4vw,46px);l
 .segs{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
 .seg{height:16px;border-radius:3px;background:var(--line);transition:background .25s}
 .seg.on{background:var(--signal)}
+.segs.full .seg.on{background:var(--good)}
 .meter-note{font-size:13px;color:var(--muted);margin:10px 0 0}
 
 dl.rules{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;margin:0;padding:18px 0 0;border-top:1px solid var(--line);font-size:15px}
@@ -188,7 +189,7 @@ body{overflow-wrap:break-word}
   <div id="setup" class="setup" hidden></div>
 
   <header class="top">
-    <span class="brand" data-cfg="BRAND">GetYourData</span>
+    <span class="brand" data-cfg="BRAND">Your Brand</span>
     <a href="#terms">Offer terms</a>
   </header>
 
@@ -210,7 +211,7 @@ body{overflow-wrap:break-word}
         <div class="meter" aria-label="Challenge progress">
           <div class="meter-head"><span>Challenge progress</span><span class="meter-read" id="meterRead">0 MB / 1024 MB</span></div>
           <div class="segs" id="segs"></div>
-          <p class="meter-note">The meter shows how far you are in the game. The data is added only after you submit the claim form.</p>
+          <p class="meter-note">The meter keeps your best progress. If you run out of time, your next try starts from here. The data is added only after you clear the board and submit the claim form.</p>
         </div>
 
         <dl class="rules">
@@ -372,9 +373,24 @@ function setup(){
   });
 }
 
+/* Progress is the best result across all tries. A new try starts the bar at that level
+   and the bar only moves up once the player beats it. Saved in the browser when allowed. */
+const STORE_KEY = 'matchClaimBest';
+let best = 0;
+try { best = Math.min(GAME.PAIRS, Math.max(0, parseInt(localStorage.getItem(STORE_KEY), 10) || 0)); } catch (e) {}
+
 function updateMeter(){
-  [...segsEl.children].forEach((s, i) => s.classList.toggle('on', i < matched));
-  meterRead.textContent = Math.round(matched * 1024 / GAME.PAIRS) + ' MB / 1024 MB';
+  if (matched > best) {
+    best = matched;
+    /* A cleared board is used up in this visit, so only partial progress is saved. */
+    try {
+      if (best < GAME.PAIRS) localStorage.setItem(STORE_KEY, String(best));
+      else localStorage.removeItem(STORE_KEY);
+    } catch (e) {}
+  }
+  [...segsEl.children].forEach((s, i) => s.classList.toggle('on', i < best));
+  segsEl.classList.toggle('full', best >= GAME.PAIRS);
+  meterRead.textContent = Math.round(best * 1024 / GAME.PAIRS) + ' MB / 1024 MB';
 }
 
 function startTimer(){
