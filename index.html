@@ -23,13 +23,13 @@
   :root:not([data-theme="light"]){
     --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
     --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
-    --card-back:#FF9A2E; color-scheme:dark;
+    --card-back:#1699be; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
   --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
-  --card-back:#FF9A2E; color-scheme:dark;
+  --card-back:#1699be; color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
@@ -79,7 +79,8 @@ dl.rules dd{margin:0;font-weight:600}
 .face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
 .back{background:var(--card-back)}
 .front{transform:rotateY(180deg);background:var(--bg);border:2px solid var(--line)}
-.front svg{width:64%;height:64%;fill:currentColor}
+.front{container-type:size}
+.emoji{color:var(--ink);font-size:30px;font-size:52cqmin;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;user-select:none}
 .card.matched .front{border-color:var(--good)}
 .card:disabled{cursor:default}
 .s0{color:var(--accent)}.s1{color:var(--signal)}.s2{color:var(--good)}.s3{color:var(--bad)}.s4{color:var(--ink)}
@@ -137,10 +138,18 @@ body{overflow-wrap:break-word}
   .hero,.claim{grid-template-columns:minmax(0,1fr);gap:32px}
   .hero>div:last-child,.claim>.panel{width:100%;max-width:520px;margin-inline:auto}
   .lede{font-size:17px}
+  /* Order on small screens: headline, intro, progress bar, game board, then the rules */
+  .hero{display:flex;flex-direction:column}
+  .intro{display:contents}
+  .gamecol{order:2}
+  .intro .rules{order:3}
 }
 /* Phones in landscape: keep two columns so the board does not push everything off screen */
 @media (orientation:landscape) and (max-height:520px) and (min-width:640px){
   .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:24px}
+  .hero{display:grid}
+  .intro{display:block}
+  .gamecol,.intro .rules{order:0}
   .hero>div:last-child,.claim>.panel{max-width:none;margin-inline:0}
 }
 /* Phones */
@@ -204,7 +213,7 @@ body{overflow-wrap:break-word}
 
   <main>
     <section class="hero">
-      <div>
+      <div class="intro">
         <h1>Match 10 pairs in 75 seconds. Claim 1 GB of mobile data.</h1>
         <p class="lede">Clear the board before the timer runs out, then enter your mobile number and operator. The data is added to your number after your claim is checked, within <span data-cfg="DELIVERY">the delivery window</span>.</p>
 
@@ -223,7 +232,7 @@ body{overflow-wrap:break-word}
         </dl>
       </div>
 
-      <div>
+      <div class="gamecol">
         <div class="panel">
           <div class="bar">
             <span class="chip" id="timeChip"><b>Time</b><span id="time">1:15</span></span>
@@ -251,7 +260,7 @@ body{overflow-wrap:break-word}
           <li><b>What we collect</b>Your mobile number and your operator. Nothing else.</li>
           <li><b>What we use it for</b><span data-cfg="USE_STATEMENT">To add the data to your number and to contact you about this claim.</span></li>
           <li><b>How long we keep it</b><span data-cfg="RETENTION">90 days after delivery</span></li>
-          <li><b>Questions or deletion</b><span data-cfg="CONTACT">support@example.com</span></li>
+          <li id="contactItem"><b>Questions or deletion</b><span data-cfg="CONTACT">support@example.com</span></li>
         </ul>
       </div>
 
@@ -308,12 +317,12 @@ const CONFIG = {
   BRAND: 'GetYourData',
   REWARD: '1 GB of mobile data',
   FUNDING: 'Ads shown on this site. Ad income pays for the data rewards.',
-  DELIVERY: '1 hour',                       // must match what you can actually deliver
+  DELIVERY: '1 hour',                     // must match what you can actually deliver
   USE_STATEMENT: 'To add the data to your number and to contact you about this claim. We do not sell your details or use them for marketing.',
   RETENTION: 'a day after delivery',
-  CONTACT: '',
-  CONSENT_TEXT: 'I agree that Your Brand may use my mobile number and operator only to deliver this reward and to contact me about my claim.',
-  AFFILIATION_NOTE: 'Your Brand is not a mobile operator. Operator names are listed only so the data can be sent to the right network.',
+  CONTACT: '',                                // add an email so people can ask for deletion
+  CONSENT_TEXT: 'I agree that GetYourData may use my mobile number and operator only to deliver this reward and to contact me about my claim.',
+  AFFILIATION_NOTE: 'GetYourData is not a mobile operator. Operator names are listed only so the data can be sent to the right network.',
   TERMS: 'One claim per mobile number per day. Claims are checked before the data is added. The offer can end without notice.'
 };
 /* =============================================== */
@@ -322,26 +331,16 @@ const GAME = { PAIRS: 10, SECONDS: 75, FLIP_BACK_MS: 700 };
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 document.querySelectorAll('[data-cfg]').forEach(el => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
+if (!CONFIG.CONTACT) document.getElementById('contactItem').hidden = true;
 if (CONFIG.ACCESS_KEY.startsWith('YOUR_') || CONFIG.BRAND === 'Your Brand') {
   const s = document.getElementById('setup');
   s.hidden = false;
   s.textContent = 'Setup needed: replace the placeholder values in the CONFIG block of this file (Web3Forms access key, brand, contact, delivery time) before you publish.';
 }
 
-/* ---- symbols: 10 distinct shapes ---- */
-const SHAPES = [
-  '<circle cx="24" cy="24" r="15"/>',
-  '<path d="M24 7 L43 39 H5Z"/>',
-  '<rect x="9" y="9" width="30" height="30" rx="4"/>',
-  '<path d="M24 5 L43 24 L24 43 L5 24Z"/>',
-  '<path d="M24 5 L29.7 18.2 L44 19.4 L33.1 28.8 L36.4 42.7 L24 35.3 L11.6 42.7 L14.9 28.8 L4 19.4 L18.3 18.2Z"/>',
-  '<path d="M18 6h12v12h12v12H30v12H18V30H6V18h12z"/>',
-  '<path d="M24 5 L41 14.5 V33.5 L24 43 L7 33.5 V14.5Z"/>',
-  '<path d="M31 6 A18 18 0 1 0 42 31 A14 14 0 1 1 31 6Z"/>',
-  '<path fill-rule="evenodd" d="M24 6a18 18 0 1 0 0 36a18 18 0 1 0 0-36zM24 15a9 9 0 1 1 0 18a9 9 0 1 1 0-18z"/>',
-  '<path d="M28 4 L9 27 H21 L18 44 L39 20 H27Z"/>'
-];
-const NAMES = ['circle','triangle','square','diamond','star','plus','hexagon','crescent','ring','bolt'];
+/* ---- the 10 pictures behind the cards: flowers, animals, fruit and more ---- */
+const EMOJIS = ['🌸','🌻','🌹','🐶','🐱','🦋','🐼','🐢','🍓','🚀'];
+const NAMES = ['cherry blossom','sunflower','rose','dog','cat','butterfly','panda','turtle','strawberry','rocket'];
 
 const $ = id => document.getElementById(id);
 const boardEl = $('board'), timeEl = $('time'), movesEl = $('moves'), statusEl = $('status');
@@ -367,7 +366,7 @@ function setup(){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'card'; b.dataset.i = i; b.dataset.v = v;
     b.setAttribute('aria-label', 'Card ' + (i+1) + ', face down');
-    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front s' + (v%5) + '"><svg viewBox="0 0 48 48" aria-hidden="true">' + SHAPES[v] + '</svg></span></span>';
+    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front"><span class="emoji" aria-hidden="true">' + EMOJIS[v] + '</span></span></span>';
     b.addEventListener('click', () => flip(b));
     boardEl.appendChild(b);
   });
@@ -468,21 +467,19 @@ $('claimForm').addEventListener('submit', async e => {
   if (!$('consent').checked) { err.textContent = 'Tick the box to confirm how your details will be used.'; $('consent').focus(); return; }
   if (CONFIG.ACCESS_KEY.startsWith('YOUR_')) { err.textContent = 'This form is not connected yet. The site owner needs to add a Web3Forms access key.'; return; }
 
+  const now = new Date();
   const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Sending...';
   try {
     const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      /* Only these four fields are sent, plus the Web3Forms access key it requires. */
       body: JSON.stringify({
         access_key: CONFIG.ACCESS_KEY,
-        subject: 'New data claim: +91 ' + mobile + ' (' + operator + ')',
-        from_name: CONFIG.BRAND + ' claim form',
+        date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' }),
+        time: now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST',
         mobile_number: '+91' + mobile,
-        operator: operator,
-        consent: 'Agreed: ' + CONFIG.CONSENT_TEXT,
-        game_seconds: winSeconds,
-        game_moves: moves,
-        submitted_at: new Date().toISOString()
+        operator: operator
       })
     });
     const data = await res.json().catch(() => ({}));
