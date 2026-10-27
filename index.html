@@ -104,6 +104,14 @@ label.field{display:grid;gap:6px;font-weight:600;font-size:15px}
 .prefix{display:grid;place-items:center;padding:0 12px;font-family:var(--mono);color:var(--muted);border-right:1px solid var(--line)}
 input[type=tel],select{font:inherit;color:var(--ink);background:var(--bg);border:0;padding:13px 12px;width:100%;min-width:0}
 input[type=tel]{font-family:var(--mono);letter-spacing:.06em;outline:none}
+input[type=text],input[type=email],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 12px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:120px;line-height:1.5}
+.links{display:flex;gap:20px;flex-wrap:wrap;justify-content:flex-end}
+.contact{margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+.contact-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.contact h2{font-family:var(--display);font-weight:700;font-size:17px;line-height:1.2;margin:0}
+.contact-sub{margin:4px 0 0;font-size:14px;color:var(--muted)}
+.contact-panel{max-width:520px;margin-top:16px}
 select.solo{border:1px solid var(--line);border-radius:10px}
 .hint{font-weight:400;font-size:13px;color:var(--muted)}
 .consent{display:grid;grid-template-columns:22px 1fr;gap:12px;font-size:14px;color:var(--muted);line-height:1.5}
@@ -199,7 +207,7 @@ body{overflow-wrap:break-word}
 
   <header class="top">
     <span class="brand" data-cfg="BRAND">Your Brand</span>
-    <a href="#terms">Offer terms</a>
+    <nav class="links" aria-label="Page links"><a href="#terms">Offer terms</a><a href="#contact">Contact us</a></nav>
   </header>
 
   <!-- Ad slot: paste your ad network code inside .ad-box. The slot stays hidden until you do.
@@ -303,6 +311,45 @@ body{overflow-wrap:break-word}
     </section>
   </main>
 
+  <section class="contact" id="contact" aria-labelledby="contactTitle">
+    <div class="contact-head">
+      <div>
+        <h2 id="contactTitle">Contact us</h2>
+        <p class="contact-sub">Questions, deletion requests or problems with the game.</p>
+      </div>
+      <button class="btn ghost" type="button" id="contactToggle" aria-expanded="false" aria-controls="contactPanel">Open form</button>
+    </div>
+
+    <div class="panel contact-panel" id="contactPanel" hidden>
+      <form id="contactForm" novalidate>
+        <input type="checkbox" name="botcheck" id="cBotcheck" tabindex="-1" autocomplete="off" style="display:none">
+
+        <label class="field" for="cName">Your name
+          <input id="cName" name="name" type="text" autocomplete="name" maxlength="80" required>
+        </label>
+
+        <label class="field" for="cEmail">Email address
+          <span class="hint">We reply to this address</span>
+          <input id="cEmail" name="email" type="email" autocomplete="email" maxlength="120" required>
+        </label>
+
+        <label class="field" for="cMessage">Message
+          <textarea id="cMessage" name="message" rows="5" maxlength="2000" required></textarea>
+        </label>
+
+        <p class="err" id="cErr" role="alert"></p>
+        <button class="btn" type="submit" id="cSubmit">Send message</button>
+        <p class="fine">We use your name and email only to reply to this message.</p>
+      </form>
+
+      <div class="done" id="contactDone" hidden>
+        <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+        <h2 style="margin:0">Message sent</h2>
+        <p style="margin:0">Thanks. We will reply to the email address you gave us.</p>
+      </div>
+    </div>
+  </section>
+
   <footer id="terms">
     <strong>Offer terms</strong>
     <span data-cfg="TERMS">One claim per mobile number. Claims are checked before the data is added. The offer can end without notice.</span>
@@ -313,7 +360,8 @@ body{overflow-wrap:break-word}
 <script>
 /* ===== Edit this block before you publish ===== */
 const CONFIG = {
-  ACCESS_KEY: 'b420ab67-6439-4015-9e7a-e3280a47e23b',   // from web3forms.com, public by design
+  ACCESS_KEY: 'b420ab67-6439-4015-9e7a-e3280a47e23b',   // claim form key, from web3forms.com, public by design
+  CONTACT_KEY: 'de75e7aa-9a80-47c8-8152-fb85198fba1a',  // contact form key
   BRAND: 'GetYourData',
   REWARD: '1 GB of mobile data',
   FUNDING: 'Ads shown on this site. Ad income pays for the data rewards.',
@@ -331,7 +379,7 @@ const GAME = { PAIRS: 10, SECONDS: 75, FLIP_BACK_MS: 700 };
 const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 document.querySelectorAll('[data-cfg]').forEach(el => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
-if (!CONFIG.CONTACT) document.getElementById('contactItem').hidden = true;
+if (!CONFIG.CONTACT) document.querySelector('#contactItem span').innerHTML = '<a href="#contact">Use the contact form at the bottom of this page</a>';
 if (CONFIG.ACCESS_KEY.startsWith('YOUR_') || CONFIG.BRAND === 'Your Brand') {
   const s = document.getElementById('setup');
   s.hidden = false;
@@ -491,6 +539,52 @@ $('claimForm').addEventListener('submit', async e => {
   } catch (ex) {
     err.textContent = 'The claim did not go through. Check your connection and try again.';
     btn.disabled = false; btn.textContent = 'Claim 1 GB';
+  }
+});
+
+/* ---- contact form: collapsed by default, opens on click ---- */
+const cPanel = $('contactPanel'), cToggle = $('contactToggle');
+function setContact(open, focus){
+  cPanel.hidden = !open;
+  cToggle.setAttribute('aria-expanded', String(open));
+  cToggle.textContent = open ? 'Close' : 'Open form';
+  if (open && focus) { $('contact').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => $('cName').focus({ preventScroll: true }), reduce ? 0 : 350); }
+}
+cToggle.addEventListener('click', () => setContact(cPanel.hidden, false));
+document.querySelectorAll('a[href="#contact"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); setContact(true, true); }));
+if (location.hash === '#contact') setContact(true, false);
+
+$('contactForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = $('cErr'); err.textContent = '';
+  if ($('cBotcheck').checked) return;
+
+  const name = $('cName').value.trim(), email = $('cEmail').value.trim(), message = $('cMessage').value.trim();
+  if (!name) { err.textContent = 'Enter your name.'; $('cName').focus(); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = 'Enter a valid email address so we can reply.'; $('cEmail').focus(); return; }
+  if (message.length < 10) { err.textContent = 'Write a message of at least 10 characters.'; $('cMessage').focus(); return; }
+
+  const btn = $('cSubmit'); btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: CONFIG.CONTACT_KEY,
+        subject: 'New message from the ' + CONFIG.BRAND + ' contact form',
+        from_name: CONFIG.BRAND + ' contact form',
+        name: name,
+        email: email,
+        message: message
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
+    $('contactForm').hidden = true;
+    $('contactDone').hidden = false;
+  } catch (ex) {
+    err.textContent = 'The message did not go through. Check your connection and try again.';
+    btn.disabled = false; btn.textContent = 'Send message';
   }
 });
 
