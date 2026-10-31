@@ -2,615 +2,695 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Match 10, Claim 1 GB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GetYourData</title>
+<meta name="description" content="Pairs by GetYourData: a free memory card game with five levels. Clear them all to claim 1 GB of mobile data.">
+<meta name="theme-color" content="#ffffff">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GetYourData | Pairs">
+<meta property="og:description" content="Pairs by GetYourData: a free memory card game with five levels. Clear them all to claim 1 GB of mobile data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23e4573d'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='800'%3EP%3C/text%3E%3C/svg%3E">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5740022360347367"
+     crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: two columns on desktop. Left = the offer, the data meter and the rules. Right = the card board.
-   The claim form opens below once the board is cleared. Single column on phones. */
-:root{
-  --bg:#F2F5FA; --surface:#FFFFFF; --ink:#0E1726; --muted:#4A5873; --line:#D5DDEA;
-  --accent:#2B45F5; --accent-ink:#FFFFFF; --signal:#E89A00; --good:#0E8A5F; --bad:#C93B3B;
-  --card-back:#1699be;
-  --display:'Unbounded', 'Arial Black', system-ui, sans-serif;
-  --body:'Instrument Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  color-scheme:light;
+:root { color-scheme: light; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+/* Layout: a start screen with title and instructions, then a full-screen board of square cards sized to fit the window. */
+:root {
+  --bg: #ffffff;
+  --surface: #f4f6f9;
+  --ink: #17202e;
+  --muted: #5d6b7e;
+  --line: #c9d1db;
+  --accent: #e4573d;
+  --accent-ink: #ffffff;
+  --good: #2e8b57;
+  --back-a: #24405f;
+  --back-b: #2d4d73;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
-    --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
-    --card-back:#1699be; color-scheme:dark;
-  }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+@supports (height: 100dvh) { body { height: 100dvh; } }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-display);
+  padding-block: 14px;
+  display: flex; flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-:root[data-theme="dark"]{
-  --bg:#0A0F1E; --surface:#121A31; --ink:#EAF0FF; --muted:#9AA8C7; --line:#26324F;
-  --accent:#7F90FF; --accent-ink:#0A0F1E; --signal:#FFB93B; --good:#3DD6A0; --bad:#FF7A7A;
-  --card-back:#1699be; color-scheme:dark;
+.topnav { flex: none; width: 100%; max-width: 1100px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2px 16px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.brand { font: 800 1.35rem var(--font-display); letter-spacing: -0.03em; background: none; border: 0; color: var(--ink); cursor: pointer; padding: 4px 0; }
+.claimbtn { font: 800 .85rem var(--font-display); letter-spacing: .01em; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.claimbtn:hover { filter: brightness(1.06); }
+.links { align-items: center; display: flex; flex-wrap: wrap; gap: 0 18px; }
+.deco { display: flex; gap: 10px; }
+.deco span { width: 54px; height: 54px; display: grid; place-items: center; font-size: 1.8rem; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 3px 8px rgba(23,32,46,.1); font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.deco span:nth-child(1) { transform: rotate(-6deg); } .deco span:nth-child(2) { transform: rotate(3deg) translateY(4px); } .deco span:nth-child(3) { transform: rotate(-3deg); } .deco span:nth-child(4) { transform: rotate(6deg) translateY(3px); }
+.panel .lede { margin-top: 10px; }
+.ad { margin: 0; }
+.ad-label { display: block; font: 500 .7rem var(--font-mono); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+.ad-box { min-height: 90px; max-width: 100%; overflow: hidden; border-radius: 10px; display: flex; justify-content: center; }
+.ad:not(:has(.ad-box ins)) { display: none; }
+.views { width: 100%; max-width: 1100px; margin: 0 auto; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+button, a { touch-action: manipulation; }
+.card { user-select: none; -webkit-user-select: none; }
+h1:focus, h2:focus { outline: none; }
+.menu[aria-current="page"] { text-decoration: underline; text-underline-offset: 4px; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* Start screen */
+.intro { min-height: 100%; display: flex; align-items: center; justify-content: center; }
+.panel { width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 22px; }
+h1 { margin: 0; font-size: clamp(3rem, 14vw, 5rem); line-height: .95; font-weight: 800; letter-spacing: -0.04em; }
+.lede { margin: 0; color: var(--muted); font-size: 1.1rem; line-height: 1.4; max-width: 34ch; }
+.how { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.how li { display: grid; grid-template-columns: 2.2rem 1fr; align-items: center; gap: 12px; font-size: 1rem; line-height: 1.35; }
+.how .ico { font-size: 1.6rem; text-align: center; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.start {
+  font: 800 1.25rem var(--font-display); letter-spacing: -0.01em;
+  background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; padding: 16px 22px; cursor: pointer; width: 100%;
 }
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body)}
-.wrap{max-width:1040px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:20px 56px}
-a{color:var(--accent)}
-:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:6px}
-
-.setup{background:var(--signal);color:#1b1300;padding:10px 14px;border-radius:10px;font-size:14px;margin-bottom:16px}
-.top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding-bottom:28px}
-.brand{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.02em}
-.top a{font-size:14px;color:var(--muted)}
-
-.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:48px;align-items:start}
-h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.4vw,46px);line-height:1.08;letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
-.lede{font-size:18px;color:var(--muted);max-width:52ch;margin:0 0 28px}
-
-.meter{margin:0 0 28px}
-.meter-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
-.meter-read{font-family:var(--mono);font-size:15px;color:var(--ink);text-transform:none;letter-spacing:0;font-variant-numeric:tabular-nums}
-.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-.seg{height:16px;border-radius:3px;background:var(--line);transition:background .25s}
-.seg.on{background:var(--signal)}
-.segs.full .seg.on{background:var(--good)}
-.meter-note{font-size:13px;color:var(--muted);margin:10px 0 0}
-
-dl.rules{display:grid;grid-template-columns:auto 1fr;gap:10px 20px;margin:0;padding:18px 0 0;border-top:1px solid var(--line);font-size:15px}
-dl.rules dt{color:var(--muted)}
-dl.rules dd{margin:0;font-weight:600}
-
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
-.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.chip{font-family:var(--mono);font-size:15px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.chip b{font-weight:500;color:var(--muted);margin-right:6px;font-family:var(--body);font-size:12px;text-transform:uppercase;letter-spacing:.07em}
-.chip.low{border-color:var(--bad);color:var(--bad)}
-.spacer{flex:1}
-.btn{font:600 15px/1 var(--body);border:0;border-radius:10px;padding:13px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:9px 14px;font-size:14px}
-.btn[disabled]{opacity:.6;cursor:progress}
-
-.boardwrap{position:relative}
-.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.card{position:relative;aspect-ratio:1/1;padding:0;border:0;background:none;perspective:600px;cursor:pointer;min-width:0}
-.inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .32s ease}
-.card.flipped .inner,.card.matched .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:grid;place-items:center}
-.back{background:var(--card-back)}
-.front{transform:rotateY(180deg);background:var(--bg);border:2px solid var(--line)}
-.front{container-type:size}
-.emoji{color:var(--ink);font-size:30px;font-size:52cqmin;line-height:1;font-family:'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;user-select:none}
-.card.matched .front{border-color:var(--good)}
-.card:disabled{cursor:default}
-.s0{color:var(--accent)}.s1{color:var(--signal)}.s2{color:var(--good)}.s3{color:var(--bad)}.s4{color:var(--ink)}
-
-.overlay{position:absolute;inset:0;border-radius:12px;background:color-mix(in srgb,var(--surface) 93%,transparent);display:grid;place-content:center;gap:14px;text-align:center;padding:20px}
-.overlay p{margin:0;font-size:18px;font-weight:600}
-.status{min-height:1.6em;margin:12px 2px 0;font-size:14px;color:var(--muted)}
-
-.claim{margin-top:56px;padding-top:36px;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:48px;align-items:start}
-.claim h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,30px);line-height:1.15;letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
-.claim h2:focus{outline:none}
-.claim p{color:var(--muted);margin:0 0 16px;max-width:52ch}
-ul.use{list-style:none;margin:0;padding:0;display:grid;gap:12px;font-size:15px}
-ul.use li{padding-left:0}
-ul.use b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
-
-form{display:grid;gap:18px}
-label.field{display:grid;gap:6px;font-weight:600;font-size:15px}
-.input-row{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;background:var(--bg);overflow:hidden}
-.input-row:focus-within{outline:3px solid var(--accent);outline-offset:2px}
-.prefix{display:grid;place-items:center;padding:0 12px;font-family:var(--mono);color:var(--muted);border-right:1px solid var(--line)}
-input[type=tel],select{font:inherit;color:var(--ink);background:var(--bg);border:0;padding:13px 12px;width:100%;min-width:0}
-input[type=tel]{font-family:var(--mono);letter-spacing:.06em;outline:none}
-input[type=text],input[type=email],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 12px;width:100%;min-width:0}
-textarea{resize:vertical;min-height:120px;line-height:1.5}
-.links{display:flex;gap:20px;flex-wrap:wrap;justify-content:flex-end}
-.contact{margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
-.contact-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.contact h2{font-family:var(--display);font-weight:700;font-size:17px;line-height:1.2;margin:0}
-.contact-sub{margin:4px 0 0;font-size:14px;color:var(--muted)}
-.contact-panel{max-width:520px;margin-top:16px}
-select.solo{border:1px solid var(--line);border-radius:10px}
-.hint{font-weight:400;font-size:13px;color:var(--muted)}
-.consent{display:grid;grid-template-columns:22px 1fr;gap:12px;font-size:14px;color:var(--muted);line-height:1.5}
-.consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
-.err{color:var(--bad);font-size:14px;min-height:1.4em;margin:0}
-.fine{font-size:13px;color:var(--muted);margin:0}
-.done{display:grid;gap:12px}
-.done .tick{width:44px;height:44px;border-radius:50%;background:var(--good);display:grid;place-items:center}
-.done .tick svg{width:22px;height:22px;stroke:var(--bg);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:grid;gap:6px;max-width:70ch}
-
-.ad{margin:0 0 32px}
-.ad-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:6px}
-.ad-box{min-height:90px;max-width:100%;overflow:hidden;border-radius:10px}
-.ad:not(:has(.ad-box ins)){display:none}
-body{overflow-wrap:break-word}
-.hero>*,.claim>*{min-width:0}
-.ad-box{display:flex;justify-content:center}
-
-/* Large desktops and wide monitors */
-@media (min-width:1400px){
-  body{font-size:18px}
-  .wrap{max-width:1240px}
-  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,520px);gap:64px}
+.start:hover { filter: brightness(1.06); }
+.linkbtn { font: 500 .85rem var(--font-mono); letter-spacing: .04em; text-transform: uppercase; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 6px 0; align-self: flex-start; text-decoration: none; text-underline-offset: 4px; }
+.linkbtn:hover { color: var(--ink); text-decoration: underline; }
+.about { min-height: 100%; display: flex; align-items: flex-start; justify-content: center; padding-block: 12px; }
+.about h2 { margin: 0; font-size: clamp(2rem, 9vw, 3rem); letter-spacing: -0.03em; line-height: 1; }
+.about h3 { margin: 0 0 8px; font: 500 .78rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.about p { margin: 0; line-height: 1.5; }
+.about .sets { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; font-size: .95rem; }
+.about .sets li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; gap: 8px; align-items: center; }
+.about .count { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.legal h2 { margin-bottom: 4px; }
+.legal h3 { margin: 6px 0 0; }
+.legal ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; line-height: 1.5; }
+.legal .meta { font: 400 .8rem var(--font-mono); color: var(--muted); }
+.fgroup { display: grid; gap: 6px; }
+.fgroup label { font: 500 .78rem var(--font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.fgroup input, .fgroup select, .fgroup textarea {
+  font: 400 1rem var(--font-display); color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px; width: 100%;
 }
-/* Small laptops and landscape tablets */
-@media (min-width:821px) and (max-width:1100px){
-  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:32px}
+.fgroup textarea { min-height: 120px; resize: vertical; }
+.fgroup input:focus-visible, .fgroup select:focus-visible, .fgroup textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.prefixrow { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.prefixrow:focus-within { outline: 3px solid var(--accent); outline-offset: 1px; }
+.prefixrow .prefix { display: grid; place-items: center; padding: 0 12px; font-family: var(--font-mono); color: var(--muted); border-right: 1px solid var(--line); }
+.prefixrow input { border: 0; border-radius: 0; background: transparent; font-family: var(--font-mono); letter-spacing: .06em; outline: none !important; }
+.done { display: grid; gap: 12px; }
+.done h2 { font-size: 1.6rem; }
+.tick { width: 44px; height: 44px; border-radius: 50%; background: var(--good); display: grid; place-items: center; }
+.tick svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.consent .menu { display: inline; padding: 0; font: inherit; text-transform: none; letter-spacing: 0; color: var(--ink); text-decoration: underline; }
+.consent { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; font-size: .92rem; line-height: 1.4; }
+.consent input { margin-top: 3px; width: 18px; height: 18px; }
+.form-msg { margin: 0; font-size: .95rem; line-height: 1.4; }
+.form-msg.err { color: var(--accent); }
+.form-msg.ok { color: var(--good); font-weight: 500; }
+.honey { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.inline-links { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 .85rem var(--font-mono); }
+.inline-links a, .inline-links button, .foot a, .foot button { color: var(--muted); background: none; border: 0; padding: 4px 0; cursor: pointer; font: inherit; text-decoration: none; text-underline-offset: 4px; }
+.inline-links a:hover, .inline-links button:hover, .foot a:hover, .foot button:hover { color: var(--ink); text-decoration: underline; }
+.foot { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 500 .8rem var(--font-mono); }
+.reward { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; font-size: .98rem; line-height: 1.4; }
+.table-wrap { overflow-x: auto; }
+.lvls { width: 100%; border-collapse: collapse; font: 400 .88rem var(--font-mono); font-variant-numeric: tabular-nums; }
+.lvls th, .lvls td { text-align: left; padding: 7px 10px 7px 0; border-bottom: 1px solid var(--line); }
+.lvls th { color: var(--muted); font-weight: 500; }
+
+/* Game screen */
+.game { height: 100%; display: flex; flex-direction: column; gap: 10px; }
+.bar { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; font: 400 0.85rem var(--font-mono); color: var(--muted); }
+.bar > span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; line-height: 1.1; white-space: nowrap; }
+.bar b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.bar .lv { background: var(--ink); border-color: var(--ink); color: var(--bg); font-weight: 500; }
+.bar .spacer { flex: 1; }
+.menu {
+  font: 500 0.85rem var(--font-mono); letter-spacing: .04em; text-transform: uppercase;
+  background: none; color: var(--ink); border: 0; padding: 4px 2px; cursor: pointer;
+  text-decoration: none; text-underline-offset: 4px;
 }
-/* Tablets and phones: one column, game and form capped to a comfortable width */
-@media (max-width:820px){
-  .hero,.claim{grid-template-columns:minmax(0,1fr);gap:32px}
-  .hero>div:last-child,.claim>.panel{width:100%;max-width:520px;margin-inline:auto}
-  .lede{font-size:17px}
-  /* Order on small screens: headline, intro, progress bar, game board, then the rules */
-  .hero{display:flex;flex-direction:column}
-  .intro{display:contents}
-  .gamecol{order:2}
-  .intro .rules{order:3}
+.menu:hover { color: var(--ink); text-decoration: underline; }
+.field { position: relative; flex: 1; min-width: 0; min-height: 0; display: grid; place-items: center; }
+.grid { display: grid; gap: var(--gap, 10px); grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); grid-template-rows: repeat(var(--rows, 3), minmax(0, 1fr)); perspective: 900px; }
+.card { position: relative; width: 100%; height: 100%; container-type: size; border: 0; padding: 0; background: none; cursor: pointer; transform-style: preserve-3d; transition: transform 0.35s cubic-bezier(.3,.7,.2,1); -webkit-tap-highlight-color: transparent; }
+.card.up, .card.done { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; border-radius: 12cqmin; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: grid; place-items: center; overflow: hidden; }
+.back {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 7px, rgba(255,255,255,.07) 7px 8px),
+    repeating-linear-gradient(-45deg, transparent 0 7px, rgba(255,255,255,.07) 7px 8px),
+    linear-gradient(160deg, var(--back-a), var(--back-b));
+  box-shadow: inset 0 0 0 3px var(--surface), 0 2px 8px rgba(23,32,46,.22);
 }
-/* Phones in landscape: keep two columns so the board does not push everything off screen */
-@media (orientation:landscape) and (max-height:520px) and (min-width:640px){
-  .hero,.claim{grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:24px}
-  .hero{display:grid}
-  .intro{display:block}
-  .gamecol,.intro .rules{order:0}
-  .hero>div:last-child,.claim>.panel{max-width:none;margin-inline:0}
+.grid.vflip .card.up, .grid.vflip .card.done { transform: rotateX(180deg); }
+.grid.vflip .front { transform: rotateX(180deg); }
+.front { background: var(--surface); transform: rotateY(180deg); box-shadow: inset 0 0 0 1px var(--line); }
+.emoji { font-size: 52cqmin; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.card.done .front { box-shadow: inset 0 0 0 3px var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); }
+@media (hover: hover) { .card:not(.up):not(.done):hover { transform: translateY(-3px); } }
+.card.done { cursor: default; }
+.card.nope .front { box-shadow: inset 0 0 0 3px var(--accent); }
+.result {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2;
+  display: flex; flex-direction: column; gap: 4px; align-items: center; text-align: center;
+  padding: 24px 32px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+  box-shadow: 0 16px 48px rgba(23,32,46,.28); max-width: calc(100% - 24px);
 }
-/* Phones */
-@media (max-width:480px){
-  .wrap{padding-block:14px 40px}
-  .top{padding-bottom:18px}
-  .hero{gap:24px}
-  .lede{font-size:16px;margin-bottom:22px}
-  .panel{padding:12px;border-radius:14px}
-  .board{gap:6px}
-  .face{border-radius:10px}
-  .bar{gap:8px}
-  .chip{font-size:14px;padding:5px 10px}
-  .claim{margin-top:40px;padding-top:28px}
-  footer{margin-top:40px}
-  dl.rules{grid-template-columns:1fr;gap:2px}
-  dl.rules dd{margin-bottom:10px}
-  .btn{width:100%}
-  .btn.ghost{width:auto}
-}
-/* Very small phones */
-@media (max-width:360px){
-  .board{gap:5px}
-  .chip b{display:none}
-  .segs{gap:3px}
-  .seg{height:12px}
-  .meter-head{flex-wrap:wrap}
-}
-/* Touch screens: larger tap targets */
-@media (pointer:coarse){
-  .btn{min-height:48px}
-  .btn.ghost{min-height:44px}
-  input[type=tel],select{min-height:48px}
-  .consent{grid-template-columns:28px 1fr}
-  .consent input{width:24px;height:24px}
-  .top a{padding:10px 0}
-}
-@media (prefers-reduced-motion:reduce){
-  .inner,.seg{transition:none}
-}
+.result strong { font-size: 1.8rem; letter-spacing: -0.02em; }
+.result span { font: 400 0.85rem var(--font-mono); color: var(--muted); }
+.result .start { width: auto; padding: 12px 20px; font-size: 1rem; margin-top: 8px; }
+@media (max-width: 560px) { .links { width: 100%; justify-content: space-between; } .topnav { gap: 0; } }
+@media (max-width: 380px) { .topnav { gap: 2px 12px; } .menu { font-size: .76rem; } h1 { font-size: 2.6rem; } }
+@media (max-height: 460px) { body { padding-block: 6px; } .topnav { padding-bottom: 4px; } .bar { font-size: .78rem; gap: 4px 14px; } .game { gap: 6px; } }
+@media (pointer: coarse) { .menu { padding: 10px 4px; } .start { min-height: 52px; } .card { min-width: 0; } }
+@media (min-width: 1100px) { .panel { max-width: 560px; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
+<noscript><p style="padding:24px;font:16px/1.5 system-ui,sans-serif">Pairs needs JavaScript. Please turn it on in your browser and reload the page.</p></noscript>
+<div class="sr-only" id="live" role="status" aria-live="polite"></div>
+<nav class="topnav" id="topnav" aria-label="Page links">
+  <button type="button" class="brand" id="brand">GetYourData</button>
+  <div class="links">
+    <button type="button" class="claimbtn" id="menu-claim" data-open="pg-claim" hidden>Claim 1 GB</button>
+    <button type="button" class="menu" id="menu">Menu</button>
+    <button type="button" class="menu" id="menu-about" data-open="about">About</button>
+    <button type="button" class="menu reward-only" id="menu-contact" data-open="pg-contact" hidden>Contact</button>
+    <button type="button" class="menu" data-open="pg-privacy">Privacy</button>
+    <button type="button" class="menu" data-open="pg-terms">Terms</button>
+  </div>
+</nav>
 
-  <div id="setup" class="setup" hidden></div>
-
-  <header class="top">
-    <span class="brand" data-cfg="BRAND">Your Brand</span>
-    <nav class="links" aria-label="Page links"><a href="#terms">Offer terms</a><a href="#contact">Contact us</a></nav>
-  </header>
-
-  <!-- Ad slot: the AdSense script sits inside .ad-box. The slot stays hidden until an ad unit (<ins>) is added next to it.
-       Keep it here, away from the game board, so players never tap an ad by accident. -->
-  <aside class="ad" aria-label="Advertisement">
-    <span class="ad-label">Advertisement</span>
-    <div class="ad-box" id="adSlot">
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5740022360347367" crossorigin="anonymous"></script>
+<div class="views" id="views">
+<main class="intro" id="intro">
+  <div class="panel">
+    <div class="deco" aria-hidden="true"><span>🌷</span><span>🚗</span><span>🐼</span><span>🍕</span></div>
+    <div>
+      <h1>Pairs</h1>
+      <p class="lede">A memory game. Find every matching pair of pictures.</p>
     </div>
-  </aside>
+    <ul class="how">
+      <li><span class="ico" aria-hidden="true">👆</span><span>Tap a card to flip it, then tap a second card.</span></li>
+      <li><span class="ico" aria-hidden="true">✅</span><span>If they match, they stay face up. If not, they flip back, so remember where they are.</span></li>
+      <li><span class="ico" aria-hidden="true">🌷</span><span>Clear the board to move up a level. Five levels, each with more cards and more kinds of pictures: flowers, tools, vehicles, animals, food and more.</span></li>
+    </ul>
+    <p class="reward reward-only" hidden>🎁 Clear all 5 levels and claim <b>1 GB of mobile data</b>. It is paid for by ad earnings and added to your number within 1 hour of a valid claim.</p>
+    <button type="button" class="start" id="start">Start game</button>
+    <aside class="ad" aria-label="Advertisement">
+      <span class="ad-label">Advertisement</span>
+      <div class="ad-box"><!-- Paste your AdSense ad unit (the <ins class="adsbygoogle"> block) here. The space stays hidden until it is added. --></div>
+    </aside>
+  </div>
+</main>
 
-  <main>
-    <section class="hero">
-      <div class="intro">
-        <h1>Match 10 pairs in 75 seconds. Claim 1 GB of mobile data.</h1>
-        <p class="lede">Clear the board before the timer runs out, then enter your mobile number and operator. The data is added to your number after your claim is checked, within <span data-cfg="DELIVERY">the delivery window</span>.</p>
-
-        <div class="meter" aria-label="Challenge progress">
-          <div class="meter-head"><span>Challenge progress</span><span class="meter-read" id="meterRead">0 MB / 1024 MB</span></div>
-          <div class="segs" id="segs"></div>
-          <p class="meter-note">The meter keeps your best progress. If you run out of time, your next try starts from here. The data is added only after you clear the board and submit the claim form.</p>
-        </div>
-
-        <dl class="rules">
-          <dt>Time limit</dt><dd>75 seconds, starts on your first flip</dd>
-          <dt>To win</dt><dd>Match all 10 pairs</dd>
-          <dt>Reward</dt><dd data-cfg="REWARD">1 GB of mobile data</dd>
-          <dt>Limit</dt><dd>One claim per mobile number per day</dd>
-          <dt>Funded by</dt><dd data-cfg="FUNDING">Ads shown on this site</dd>
-        </dl>
-      </div>
-
-      <div class="gamecol">
-        <div class="panel">
-          <div class="bar">
-            <span class="chip" id="timeChip"><b>Time</b><span id="time">1:15</span></span>
-            <span class="chip"><b>Moves</b><span id="moves">0</span></span>
-            <span class="spacer"></span>
-            <button class="btn ghost" type="button" id="restart">Restart</button>
-          </div>
-          <div class="boardwrap">
-            <div class="board" id="board" role="group" aria-label="Memory card board, 20 cards"></div>
-            <div class="overlay" id="lost" hidden>
-              <p id="lostText">Time is up.</p>
-              <button class="btn" type="button" id="retry">Try again</button>
-            </div>
-          </div>
-          <p class="status" id="status" role="status" aria-live="polite">Flip any card to start the timer.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="claim" id="claim" hidden>
-      <div>
-        <h2 id="claimTitle" tabindex="-1">You cleared the board. Claim your data.</h2>
-        <p id="winLine"></p>
-        <ul class="use">
-          <li><b>What we collect</b>Through this form we collect only your mobile number and your operator. Ads on this site are served by Google AdSense, which may use cookies to show and measure ads.</li>
-          <li><b>What we use it for</b><span data-cfg="USE_STATEMENT">To add the data to your number and to contact you about this claim.</span></li>
-          <li><b>How long we keep it</b><span data-cfg="RETENTION">90 days after delivery</span></li>
-          <li id="contactItem"><b>Questions or deletion</b><span data-cfg="CONTACT">support@example.com</span></li>
-        </ul>
-      </div>
-
-      <div class="panel">
-        <form id="claimForm" novalidate>
-          <input type="checkbox" name="botcheck" id="botcheck" tabindex="-1" autocomplete="off" style="display:none">
-
-          <label class="field" for="mobile">Mobile number
-            <span class="hint">10 digits, the number that should receive the data</span>
-            <span class="input-row"><span class="prefix">+91</span><input id="mobile" name="mobile" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" maxlength="16" required></span>
-          </label>
-
-          <label class="field" for="operator">Network operator
-            <select id="operator" name="operator" class="solo" required>
-              <option value="" selected disabled>Choose your operator</option>
-              <option>Jio</option>
-              <option>Airtel</option>
-              <option>Vi (Vodafone Idea)</option>
-              <option>BSNL</option>
-              <option>MTNL</option>
-            </select>
-          </label>
-
-          <label class="consent" for="consent">
-            <input id="consent" name="consent" type="checkbox" required>
-            <span data-cfg="CONSENT_TEXT">I agree to the use of my number and operator as described here.</span>
-          </label>
-
-          <p class="err" id="err" role="alert"></p>
-          <button class="btn" type="submit" id="submitBtn">Claim 1 GB</button>
-          <p class="fine"><span data-cfg="AFFILIATION_NOTE"></span></p>
-        </form>
-
-        <div class="done" id="done" hidden>
-          <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-          <h2 style="margin:0">Claim received</h2>
-          <p id="doneText" style="margin:0"></p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <section class="contact" id="contact" aria-labelledby="contactTitle">
-    <div class="contact-head">
-      <div>
-        <h2 id="contactTitle">Contact us</h2>
-        <p class="contact-sub">Questions, deletion requests or problems with the game.</p>
-      </div>
-      <button class="btn ghost" type="button" id="contactToggle" aria-expanded="false" aria-controls="contactPanel">Open form</button>
+<main class="about" id="about" hidden>
+  <div class="panel">
+    <h2>About Pairs</h2>
+    <p>Pairs is a memory card game. Every card hides a picture, and every picture appears twice. Flip two cards at a time and remember where things are until you have matched them all.</p>
+    <div>
+      <h3>Levels</h3>
+      <p class="count">5</p>
     </div>
+    <p class="reward reward-only" hidden>Clear all 5 levels to claim 1 GB of mobile data. The data is paid for by ad earnings and added to your number within 1 hour of a valid claim. See the Terms for the rules.</p>
+    <aside class="ad" aria-label="Advertisement">
+      <span class="ad-label">Advertisement</span>
+      <div class="ad-box"><!-- Paste your AdSense ad unit (the <ins class="adsbygoogle"> block) here. The space stays hidden until it is added. --></div>
+    </aside>
+  </div>
+</main>
 
-    <div class="panel contact-panel" id="contactPanel" hidden>
-      <form id="contactForm" novalidate>
-        <input type="checkbox" name="botcheck" id="cBotcheck" tabindex="-1" autocomplete="off" style="display:none">
+<main class="about legal" id="pg-privacy" hidden>
+  <div class="panel">
+    <h2>Privacy</h2>
+    <p class="meta">Plain-language summary of what this game does with your information.</p>
+    <h3>On your device</h3>
+    <ul><li>Your best result for each level is saved in your browser so you can see it next time. It never leaves your device and there is no account.</li></ul>
+    <h3>If you claim the reward</h3>
+    <ul>
+      <li>We ask for your mobile number and your network operator, and nothing else.</li>
+      <li>We use them only to check your claim and to add the data to your number.</li>
+      <li>The details are sent through the form service Web3Forms to GetYourData. We do not sell them or use them for marketing. Ads on this site may use cookies to show and measure ads.</li>
+      <li>We keep a claim for a day after the data is delivered.</li>
+    </ul>
+    <h3>If you use the contact form</h3>
+    <ul><li>We receive your name, email address and message, and use them only to reply to you.</li></ul>
+    <h3>Ads</h3>
+    <ul><li>Ads fund the reward. Ad providers may collect information about your visit under their own privacy policies.</li></ul>
+    <h3>Your choices</h3>
+    <ul><li>You can ask us to delete your claim or message through the Contact page.</li></ul>
+  </div>
+</main>
 
-        <label class="field" for="cName">Your name
-          <input id="cName" name="name" type="text" autocomplete="name" maxlength="80" required>
-        </label>
+<main class="about legal" id="pg-terms" hidden>
+  <div class="panel">
+    <h2>Terms</h2>
+    <p class="meta">The rules for playing and for the reward.</p>
+    <h3>The game</h3>
+    <ul><li>Pairs, from GetYourData, is free to play. You do not need to sign in.</li></ul>
+    <h3>The reward</h3>
+    <ul>
+      <li>Clear all 5 levels, then send a claim with your mobile number and network operator.</li>
+      <li>The data is added to that number after the claim is checked, within 1 hour.</li>
+      <li data-brand-li><span data-brand></span> is not a mobile operator. Operator names are listed only so the data can be sent to the right network.</li>
+      <li>The reward is paid for from ad earnings. It has no cash value and cannot be transferred.</li>
+      <li>One claim per mobile number per day.</li>
+      <li>We may decline a claim with a wrong or unsupported number or operator, a repeat claim, or one made by automated play.</li>
+      <li>Your operator&rsquo;s own rules apply to how the data is added and used.</li>
+    </ul>
+    <h3>Changes</h3>
+    <ul><li>We may change the game, the reward or these terms. The version on this page is the one that applies.</li></ul>
+  </div>
+</main>
 
-        <label class="field" for="cEmail">Email address
-          <span class="hint">We reply to this address</span>
-          <input id="cEmail" name="email" type="email" autocomplete="email" maxlength="120" required>
-        </label>
-
-        <label class="field" for="cMessage">Message
-          <textarea id="cMessage" name="message" rows="5" maxlength="2000" required></textarea>
-        </label>
-
-        <p class="err" id="cErr" role="alert"></p>
-        <button class="btn" type="submit" id="cSubmit">Send message</button>
-        <p class="fine">We use your name and email only to reply to this message.</p>
-      </form>
-
-      <div class="done" id="contactDone" hidden>
-        <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-        <h2 style="margin:0">Message sent</h2>
-        <p style="margin:0">Thanks. We will reply to the email address you gave us.</p>
-      </div>
+<main class="about legal" id="pg-contact" hidden>
+  <div class="panel">
+    <h2>Contact</h2>
+    <form id="contact-form" class="panel" novalidate>
+      <div class="honey" aria-hidden="true"><label for="c-bot">Leave this empty</label><input type="text" id="c-bot" name="botcheck" tabindex="-1" autocomplete="off"></div>
+      <div class="fgroup"><label for="c-name">Name</label><input type="text" id="c-name" name="name" autocomplete="name" required></div>
+      <div class="fgroup"><label for="c-email">Email</label><input type="email" id="c-email" name="email" autocomplete="email" required></div>
+      <div class="fgroup"><label for="c-msg">Message</label><textarea id="c-msg" name="message" required></textarea></div>
+      <p class="form-msg err" id="contact-msg" role="alert"></p>
+      <button type="submit" class="start" id="contact-send">Send message</button>
+      <p class="meta">We use your name and email only to reply to this message.</p>
+    </form>
+    <div class="panel done" id="contact-done" hidden>
+      <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h2>Message sent</h2>
+      <p>Thanks. We will reply to the email address you gave us.</p>
     </div>
-  </section>
+    <div class="inline-links" id="contact-links"></div>
+    <button type="button" class="menu" data-back>Back</button>
+  </div>
+</main>
 
-  <footer id="terms">
-    <strong>Offer terms</strong>
-    <span data-cfg="TERMS">One claim per mobile number. Claims are checked before the data is added. The offer can end without notice.</span>
-    <span data-cfg="AFFILIATION_NOTE"></span>
-  </footer>
+<main class="about legal" id="pg-claim" hidden>
+  <div class="panel">
+    <h2>Claim 1 GB</h2>
+    <p>Well played. Enter your mobile number and operator. The data is added to your number after your claim is checked, within 1 hour.</p>
+    <form id="claim-form" class="panel" novalidate>
+      <div class="honey" aria-hidden="true"><label for="k-bot">Leave this empty</label><input type="text" id="k-bot" name="botcheck" tabindex="-1" autocomplete="off"></div>
+      <div class="fgroup"><label for="k-mobile">Mobile number</label>
+        <div class="prefixrow"><span class="prefix">+91</span><input type="tel" id="k-mobile" name="mobile" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" maxlength="16" required></div>
+        <span class="meta">10 digits, the number that should receive the data</span>
+      </div>
+      <div class="fgroup"><label for="k-op">Network operator</label>
+        <select id="k-op" name="operator" required>
+          <option value="">Choose your operator</option>
+          <option>Jio</option><option>Airtel</option><option>Vi (Vodafone Idea)</option><option>BSNL</option><option>MTNL</option>
+        </select>
+      </div>
+      <label class="consent" for="k-ok"><input type="checkbox" id="k-ok" name="consent"><span>I agree that <span data-brand></span> may use my mobile number and operator only to deliver this reward and to contact me about my claim. See the <button type="button" class="menu" data-open="pg-terms">Terms</button> and <button type="button" class="menu" data-open="pg-privacy">Privacy</button> notice.</span></label>
+      <p class="form-msg err" id="claim-msg" role="alert"></p>
+      <button type="submit" class="start" id="claim-send">Claim 1 GB</button>
+      <p class="meta"><span data-brand></span> is not a mobile operator. Operator names are listed only so the data can be sent to the right network.</p>
+    </form>
+    <div class="panel done" id="claim-done" hidden>
+      <div class="tick" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h2>Claim received</h2>
+      <p id="claim-done-text"></p>
+    </div>
+  </div>
+</main>
+
+<main class="game" id="game" hidden>
+  <div class="bar">
+    <span class="lv" id="lvname">Easy</span>
+    <span>Moves <b id="moves">0</b></span>
+    <span>Time <b id="time">0:00</b></span>
+    <span>Matched <b id="matched">0/6</b></span>
+  </div>
+  <div class="field" id="field">
+    <div class="grid" id="grid"></div>
+    <div class="result" id="result" hidden role="status">
+      <strong id="result-title">Level cleared</strong>
+      <span id="result-detail"></span>
+      <button type="button" class="start reward-only" id="claim-open" data-open="pg-claim" hidden>Claim 1 GB</button>
+    </div>
+  </div>
+</main>
 </div>
 
 <script>
-/* ===== Edit this block before you publish ===== */
-const CONFIG = {
-  ACCESS_KEY: 'b420ab67-6439-4015-9e7a-e3280a47e23b',   // claim form key, from web3forms.com, public by design
-  CONTACT_KEY: 'de75e7aa-9a80-47c8-8152-fb85198fba1a',  // contact form key
-  BRAND: 'GetYourData',
-  REWARD: '1 GB of mobile data',
-  FUNDING: 'Ads shown on this site. Ad income pays for the data rewards.',
-  DELIVERY: '1 hour',                     // must match what you can actually deliver
-  USE_STATEMENT: 'To add the data to your number and to contact you about this claim. We do not sell your details or use them for marketing.',
-  RETENTION: 'a day after delivery',
-  CONTACT: '',                                // add an email so people can ask for deletion
-  CONSENT_TEXT: 'I agree that GetYourData may use my mobile number and operator only to deliver this reward and to contact me about my claim.',
-  AFFILIATION_NOTE: 'GetYourData is not a mobile operator. Operator names are listed only so the data can be sent to the right network.',
-  TERMS: 'One claim per mobile number per day. Claims are checked before the data is added. The offer can end without notice.'
-};
-/* =============================================== */
+(function () {
+  // Reward and contact forms are sent through Web3Forms (public access keys, safe to keep in the page).
+  // If either key is empty, every reward and contact feature stays hidden.
+  var CLAIM_KEY = 'b420ab67-6439-4015-9e7a-e3280a47e23b';
+  var CONTACT_KEY = 'de75e7aa-9a80-47c8-8152-fb85198fba1a';
+  var BRAND = 'GetYourData';
+  var DELIVERY = '1 hour';
+  var CONTACT_LINKS = []; // e.g. [{ label: 'Email', url: 'https://example.com' }]
+  var REWARD_ENABLED = CLAIM_KEY !== '' && CONTACT_KEY !== '';
 
-const GAME = { PAIRS: 10, SECONDS: 75, FLIP_BACK_MS: 700 };
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var LEVELS = {
+    easy:   { name: 'Level 1',   pairs: 6,  mix: 1 },
+    medium: { name: 'Level 2', pairs: 8,  mix: 2 },
+    tricky: { name: 'Level 3', pairs: 10, mix: 3 },
+    hard:   { name: 'Level 4',   pairs: 12, mix: 4 },
+    expert: { name: 'Level 5', pairs: 14, mix: 5 }
+  };
+  var ORDER = ['easy', 'medium', 'tricky', 'hard', 'expert'];
+  var SETS = {
+    flowers:  { items: ['🌹','🌷','🌻','🌼','🌸','🪷','💐','🌺','🪻','🏵️','🥀'], names: ['rose','tulip','sunflower','blossom','cherry blossom','lotus','bouquet','hibiscus','hyacinth','rosette','wilted rose'] },
+    tools:    { items: ['🔨','🪛','🔧','🪚','🪓','⛏️','🔩','🧰','🪜','🗜️','📏','🧲'], names: ['hammer','screwdriver','wrench','saw','axe','pickaxe','nut and bolt','toolbox','ladder','clamp','ruler','magnet'] },
+    vehicles: { items: ['🚗','🚌','🚲','🏍️','✈️','🚂','🚁','🚢','🚜','🚒','🛵','🚀'], names: ['car','bus','bicycle','motorcycle','airplane','train','helicopter','ship','tractor','fire engine','scooter','rocket'] },
+    everyday: { items: ['☕','🔑','📱','💡','🎒','⏰','🪥','👓','📖','☂️','🧺','🪞'], names: ['coffee','key','phone','light bulb','backpack','alarm clock','toothbrush','glasses','book','umbrella','laundry basket','mirror'] },
+    animals:  { items: ['🐶','🐱','🐼','🦊','🐸','🐧','🦁','🐢','🐙','🦋','🐝','🐘'], names: ['dog','cat','panda','fox','frog','penguin','lion','turtle','octopus','butterfly','bee','elephant'] },
+    food:     { items: ['🍎','🍌','🍇','🍓','🍕','🍔','🍩','🥕','🍉','🥑','🍪','🧀'], names: ['apple','banana','grapes','strawberry','pizza','burger','donut','carrot','watermelon','avocado','cookie','cheese'] },
+    sports:   { items: ['⚽','🏀','🏈','⚾','🎾','🏐','🏓','🥊','⛳','🏹','🎳','🛹'], names: ['football','basketball','american football','baseball','tennis','volleyball','table tennis','boxing glove','golf','archery','bowling','skateboard'] },
+    nature:   { items: ['☀️','🌙','⭐','🌈','☁️','⚡','❄️','🔥','💧','🌲','🌵','🍄'], names: ['sun','moon','star','rainbow','cloud','lightning','snowflake','fire','water drop','tree','cactus','mushroom'] }
+  };
 
-document.querySelectorAll('[data-cfg]').forEach(el => { el.textContent = CONFIG[el.dataset.cfg] || ''; });
-if (!CONFIG.CONTACT) document.querySelector('#contactItem span').innerHTML = '<a href="#contact">Use the contact form at the bottom of this page</a>';
-if (CONFIG.ACCESS_KEY.startsWith('YOUR_') || CONFIG.BRAND === 'Your Brand') {
-  const s = document.getElementById('setup');
-  s.hidden = false;
-  s.textContent = 'Setup needed: replace the placeholder values in the CONFIG block of this file (Web3Forms access key, brand, contact, delivery time) before you publish.';
-}
+  var introEl = document.getElementById('intro');
+  var aboutEl = document.getElementById('about');
+  var gameEl = document.getElementById('game');
+  var fieldEl = document.getElementById('field');
+  var gridEl = document.getElementById('grid');
+  var lvEl = document.getElementById('lvname');
+  var movesEl = document.getElementById('moves');
+  var timeEl = document.getElementById('time');
+  var matchedEl = document.getElementById('matched');
+  var resultEl = document.getElementById('result');
+  var resultTitle = document.getElementById('result-title');
+  var resultDetail = document.getElementById('result-detail');
 
-/* ---- pictures behind the cards ----
-   Every new board picks 10 different pictures at random from this pool:
-   flowers, animals, tools, everyday things, food and a few extras.
-   Add or remove lines freely (keep at least 10). Each line is [emoji, name for screen readers]. */
-const POOL = [
-  // flowers and plants
-  ['🌸','cherry blossom'],['🌻','sunflower'],['🌹','rose'],['🌷','tulip'],['🌼','daisy'],['🌵','cactus'],
-  // animals
-  ['🐶','dog'],['🐱','cat'],['🦋','butterfly'],['🐼','panda'],['🐢','turtle'],['🐘','elephant'],['🦁','lion'],
-  ['🐸','frog'],['🐧','penguin'],['🐙','octopus'],['🐝','bee'],['🦊','fox'],['🐠','fish'],
-  // tools
-  ['🔨','hammer'],['🔧','wrench'],['✂️','scissors'],['🔦','flashlight'],['🧰','toolbox'],['📏','ruler'],
-  ['🔑','key'],['🔒','lock'],['⚙️','gear'],['🧲','magnet'],['🪓','axe'],['🔩','nut and bolt'],
-  // everyday things
-  ['☕','coffee'],['📱','phone'],['💡','light bulb'],['⏰','alarm clock'],['🎒','backpack'],['👓','glasses'],
-  ['📚','books'],['🚲','bicycle'],['🛒','shopping cart'],['🔔','bell'],['🎧','headphones'],['📎','paperclip'],
-  ['🧹','broom'],['🧦','socks'],['🪑','chair'],['🕯️','candle'],
-  // food
-  ['🍓','strawberry'],['🍎','apple'],['🍌','banana'],['🍕','pizza'],['🍪','cookie'],['🥕','carrot'],
-  ['🍉','watermelon'],['🍩','donut'],
-  // extras
-  ['🚀','rocket'],['🌈','rainbow'],['⚽','football'],['🎈','balloon']
-];
-let faces = [];
+  var cleared = false; // true once every level has been cleared in this visit
+  var liveEl = document.getElementById('live');
+  function announce(text) { liveEl.textContent = ''; setTimeout(function () { liveEl.textContent = text; }, 30); }
+  var level = 'easy';
+  var entries = [], cards = [];
+  var first = null, second = null, lock = false;
+  var moves = 0, matched = 0, seconds = 0, timer = null, started = false, nextTimer = null;
 
-const $ = id => document.getElementById(id);
-const boardEl = $('board'), timeEl = $('time'), movesEl = $('moves'), statusEl = $('status');
-const segsEl = $('segs'), meterRead = $('meterRead'), lostEl = $('lost');
+  function fmt(s) { return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function readBest() { try { var v = localStorage.getItem('pairs-best-' + level); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function writeBest(b) { try { localStorage.setItem('pairs-best-' + level, JSON.stringify(b)); } catch (e) {} }
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+  function clearNext() { if (nextTimer) { clearTimeout(nextTimer); nextTimer = null; } }
 
-for (let i = 0; i < GAME.PAIRS; i++) { const d = document.createElement('div'); d.className = 'seg'; segsEl.appendChild(d); }
+  // Fill the whole board area. Pick the cols x rows split whose cards come closest to a square,
+  // then stretch the grid to the full area, so cards may be squares or rectangles depending on the screen.
+  function layout() {
+    var n = cards.length;
+    if (!n) return;
+    var W = fieldEl.clientWidth, H = fieldEl.clientHeight;
+    if (W < 50 || H < 50) return; // board is hidden or not measured yet
+    var g = W < 440 ? 6 : 10;
+    var best = null;
+    for (var cols = 2; cols <= n / 2; cols++) {
+      if (n % cols) continue;
+      var rows = n / cols;
+      var cw = (W - (cols - 1) * g) / cols, ch = (H - (rows - 1) * g) / rows;
+      if (cw < 20 || ch < 20) continue;
+      var skew = Math.abs(Math.log(cw / ch)); // 0 means a perfect square
+      if (!best || skew < best.skew) best = { cols: cols, rows: rows, skew: skew };
+    }
+    if (!best) return;
+    gridEl.style.setProperty('--cols', best.cols);
+    gridEl.style.setProperty('--rows', best.rows);
+    gridEl.style.setProperty('--gap', g + 'px');
+    // Rectangular cards flip upside down (top to bottom); square cards flip sideways.
+    gridEl.classList.toggle('vflip', best.skew > 0.08);
+    gridEl.style.width = W + 'px';
+    gridEl.style.height = H + 'px';
+  }
 
-let deck, first, second, locked, matched, moves, started, remaining, timer, won = false, winSeconds = 0;
+  function newGame() {
+    stopTimer(); clearNext();
+    var cfg = LEVELS[level];
+    first = second = null; lock = false;
+    moves = 0; matched = 0; seconds = 0; started = false;
+    lvEl.textContent = cfg.name;
+    announce(cfg.name + ' started. Find ' + cfg.pairs + ' pairs.');
+    movesEl.textContent = '0';
+    timeEl.textContent = '0:00';
+    matchedEl.textContent = '0/' + cfg.pairs;
+    resultEl.hidden = true;
 
-function shuffle(a){ for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+    var keys = shuffle(Object.keys(SETS)).slice(0, cfg.mix);
+    var pools = keys.map(function (k) {
+      return shuffle(SETS[k].items.map(function (e, i) { return { e: e, name: SETS[k].names[i] }; }));
+    });
+    entries = [];
+    for (var n = 0; n < cfg.pairs; n++) entries.push(pools[n % pools.length].pop());
+    var ids = entries.map(function (_, i) { return i; });
+    var deck = shuffle(ids.concat(ids));
+    gridEl.innerHTML = '';
+    cards = deck.map(function (id, idx) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card';
+      b.id = 'card-' + idx;
+      b.setAttribute('aria-label', 'Card ' + (idx + 1) + ', face down');
+      b.innerHTML = '<span class="face back"></span><span class="face front"><span class="emoji" aria-hidden="true">' + entries[id].e + '</span></span>';
+      var c = { el: b, id: id, idx: idx, open: false, done: false };
+      b.addEventListener('click', function () { flip(c); });
+      gridEl.appendChild(b);
+      return c;
+    });
+    layout();
+  }
 
-function setup(){
-  clearInterval(timer);
-  faces = shuffle(POOL.slice()).slice(0, GAME.PAIRS);
-  deck = shuffle([...Array(GAME.PAIRS).keys(), ...Array(GAME.PAIRS).keys()]);
-  first = second = null; locked = false; matched = 0; moves = 0; started = false; remaining = GAME.SECONDS;
-  lostEl.hidden = true;
-  movesEl.textContent = '0'; timeEl.textContent = fmt(remaining); $('timeChip').classList.remove('low');
-  statusEl.textContent = 'Flip any card to start the timer.';
-  updateMeter();
-  boardEl.innerHTML = '';
-  deck.forEach((v, i) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'card'; b.dataset.i = i; b.dataset.v = v;
-    b.setAttribute('aria-label', 'Card ' + (i+1) + ', face down');
-    b.innerHTML = '<span class="inner"><span class="face back"></span><span class="face front"><span class="emoji" aria-hidden="true">' + faces[v][0] + '</span></span></span>';
-    b.addEventListener('click', () => flip(b));
-    boardEl.appendChild(b);
+  function setLabel(c) {
+    var n = 'Card ' + (c.idx + 1), nm = entries[c.id].name;
+    c.el.setAttribute('aria-label', c.done ? n + ', ' + nm + ', matched' : c.open ? n + ', ' + nm : n + ', face down');
+  }
+
+  function flip(c) {
+    if (lock || c.open || c.done) return;
+    if (!started) {
+      started = true;
+      timer = setInterval(function () { seconds++; timeEl.textContent = fmt(seconds); }, 1000);
+    }
+    c.open = true;
+    c.el.classList.add('up');
+    setLabel(c);
+    if (!first) { first = c; return; }
+    second = c;
+    moves++;
+    movesEl.textContent = moves;
+    lock = true;
+    if (first.id === second.id) {
+      var a = first, b = second;
+      setTimeout(function () {
+        a.done = b.done = true;
+        a.el.classList.remove('up'); b.el.classList.remove('up');
+        a.el.classList.add('done'); b.el.classList.add('done');
+        setLabel(a); setLabel(b);
+        matched++;
+        matchedEl.textContent = matched + '/' + LEVELS[level].pairs;
+        announce('Match found. ' + matched + ' of ' + LEVELS[level].pairs + '.');
+        first = second = null; lock = false;
+        if (matched === LEVELS[level].pairs) win();
+      }, 350);
+    } else {
+      var x = first, y = second;
+      setTimeout(function () { x.el.classList.add('nope'); y.el.classList.add('nope'); }, 250);
+      setTimeout(function () {
+        [x, y].forEach(function (k) { k.open = false; k.el.classList.remove('up', 'nope'); setLabel(k); });
+        first = second = null; lock = false;
+      }, 900);
+    }
+  }
+
+  function win() {
+    stopTimer();
+    var b = readBest();
+    var better = !b || moves < b.moves || (moves === b.moves && seconds < b.seconds);
+    if (better) writeBest({ moves: moves, seconds: seconds });
+    var at = ORDER.indexOf(level);
+    var last = at === ORDER.length - 1;
+    if (last) cleared = true;
+    if (last && REWARD_ENABLED) {
+      document.getElementById('menu-claim').hidden = false; // stays in the top bar so the claim form can be reopened
+      nextTimer = setTimeout(function () { openPage('pg-claim'); }, 700);
+    } else if (last) {
+      document.getElementById('claim-open').hidden = !REWARD_ENABLED;
+      resultTitle.textContent = 'All levels cleared';
+      resultDetail.textContent = moves + ' moves in ' + fmt(seconds) + (better ? ' · new best' : '');
+      resultEl.hidden = false;
+    } else {
+      nextTimer = setTimeout(function () { startLevel(ORDER[at + 1]); }, 700);
+    }
+  }
+
+  function startLevel(key) {
+    level = key;
+    viewStack = [];
+    allViews.forEach(function (v) { v.hidden = v !== gameEl; });
+    afterViewChange();
+    newGame();
+  }
+  function showMenu() {
+    stopTimer(); clearNext();
+    viewStack = [];
+    allViews.forEach(function (v) { v.hidden = v !== introEl; });
+    window.scrollTo(0, 0);
+    afterViewChange();
+  }
+
+  document.getElementById('start').addEventListener('click', function () { startLevel('easy'); });
+  document.getElementById('menu').addEventListener('click', showMenu);
+  document.getElementById('brand').addEventListener('click', showMenu);
+  // ---- Extra pages: privacy, terms, contact, claim ----
+  var allViews = [introEl, aboutEl, gameEl].concat([].slice.call(document.querySelectorAll('main.legal')));
+  var viewStack = [];
+  // After any page change: mark the current top-bar link and move keyboard focus to the page heading.
+  function afterViewChange() {
+    var cur = visibleView();
+    document.querySelectorAll('#topnav .menu').forEach(function (b) {
+      var on = (b.id === 'menu' && cur === introEl) || (b.getAttribute('data-open') === (cur && cur.id));
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    var h = cur && cur !== gameEl && cur.querySelector('h1, h2');
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
+  }
+  function visibleView() { for (var i = 0; i < allViews.length; i++) if (!allViews[i].hidden) return allViews[i]; return null; }
+  function resumeGame() {
+    layout();
+    if (started && matched < LEVELS[level].pairs && !timer) {
+      timer = setInterval(function () { seconds++; timeEl.textContent = fmt(seconds); }, 1000);
+    }
+  }
+  function openPage(id) {
+    var cur = visibleView();
+    var page = document.getElementById(id);
+    if (!page) return;
+    if (id === 'pg-claim' && !cleared) return; // the claim form opens only after every level is cleared
+    if (cur === page) { if (page !== introEl && page !== gameEl) goBack(page); return; }
+    if (cur === gameEl) stopTimer();
+    if (cur) { cur.hidden = true; if (cur === introEl || cur === gameEl) viewStack.push(cur); }
+    page.hidden = false;
+    window.scrollTo(0, 0);
+    afterViewChange();
+  }
+  function goBack(page) {
+    page.hidden = true;
+    var back = viewStack.pop() || introEl;
+    back.hidden = false;
+    if (back === gameEl) resumeGame();
+    window.scrollTo(0, 0);
+    afterViewChange();
+  }
+  function closePage(btn) { goBack(btn.closest('main')); }
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest('[data-open]');
+    if (o) { openPage(o.getAttribute('data-open')); return; }
+    var b = e.target.closest('[data-back]');
+    if (b) closePage(b);
   });
-}
 
-/* Progress is the best result across all tries. A new try starts the bar at that level
-   and the bar only moves up once the player beats it. Saved in the browser when allowed. */
-const STORE_KEY = 'matchClaimBest';
-let best = 0;
-try { best = Math.min(GAME.PAIRS, Math.max(0, parseInt(localStorage.getItem(STORE_KEY), 10) || 0)); } catch (e) {}
+  document.querySelectorAll('.reward-only').forEach(function (el) { el.hidden = !REWARD_ENABLED; });
+  var linksEl = document.getElementById('contact-links');
+  CONTACT_LINKS.forEach(function (l) {
+    var a = document.createElement('a');
+    a.href = l.url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = l.label;
+    linksEl.appendChild(a);
+  });
 
-function updateMeter(){
-  if (matched > best) {
-    best = matched;
-    /* A cleared board is used up in this visit, so only partial progress is saved. */
-    try {
-      if (best < GAME.PAIRS) localStorage.setItem(STORE_KEY, String(best));
-      else localStorage.removeItem(STORE_KEY);
-    } catch (e) {}
-  }
-  [...segsEl.children].forEach((s, i) => s.classList.toggle('on', i < best));
-  segsEl.classList.toggle('full', best >= GAME.PAIRS);
-  meterRead.textContent = Math.round(best * 1024 / GAME.PAIRS) + ' MB / 1024 MB';
-}
+  document.querySelectorAll('[data-brand]').forEach(function (el) { el.textContent = BRAND; });
 
-function startTimer(){
-  started = true;
-  timer = setInterval(() => {
-    remaining--;
-    timeEl.textContent = fmt(remaining);
-    $('timeChip').classList.toggle('low', remaining <= 10);
-    if (remaining <= 0) lose();
-  }, 1000);
-}
-
-function reveal(b, on){
-  b.classList.toggle('flipped', on);
-  b.setAttribute('aria-label', on ? 'Card ' + (+b.dataset.i+1) + ', ' + faces[b.dataset.v][1] :'Card ' + (+b.dataset.i+1) + ', face down');
-}
-
-function flip(b){
-  if (locked || won || b.classList.contains('flipped') || b.classList.contains('matched') || remaining <= 0) return;
-  if (!started) startTimer();
-  reveal(b, true);
-  if (!first) { first = b; return; }
-  second = b; moves++; movesEl.textContent = moves; locked = true;
-  if (first.dataset.v === second.dataset.v) {
-    [first, second].forEach(c => { c.classList.add('matched'); c.disabled = true; c.setAttribute('aria-label', 'Matched ' + faces[c.dataset.v][1]); });
-    matched++; updateMeter();
-    first = second = null; locked = false;
-    statusEl.textContent = matched + ' of ' + GAME.PAIRS + ' pairs matched.';
-    if (matched === GAME.PAIRS) win();
-  } else {
-    setTimeout(() => { reveal(first, false); reveal(second, false); first = second = null; locked = false; }, reduce ? 450 : GAME.FLIP_BACK_MS);
-  }
-}
-
-function lose(){
-  clearInterval(timer); locked = true;
-  $('lostText').textContent = 'Time is up. You matched ' + matched + ' of ' + GAME.PAIRS + ' pairs.';
-  lostEl.hidden = false; $('retry').focus();
-  statusEl.textContent = 'Time is up.';
-}
-
-function win(){
-  clearInterval(timer); won = true; locked = true;
-  winSeconds = GAME.SECONDS - remaining;
-  statusEl.textContent = 'Board cleared in ' + winSeconds + ' seconds with ' + moves + ' moves.';
-  $('winLine').textContent = 'Cleared in ' + winSeconds + ' seconds with ' + moves + ' moves. Enter the number that should receive the data.';
-  const sec = $('claim'); sec.hidden = false;
-  setTimeout(() => {
-    sec.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
-    $('claimTitle').focus({ preventScroll: true });
-  }, reduce ? 0 : 500);
-}
-
-$('restart').addEventListener('click', () => { if (!won) setup(); });
-$('retry').addEventListener('click', setup);
-
-/* ---- claim form ---- */
-function normaliseMobile(raw){
-  let d = String(raw).replace(/\D/g, '');
-  if (d.length === 12 && d.startsWith('91')) d = d.slice(2);
-  else if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
-  return d;
-}
-
-$('claimForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const err = $('err'); err.textContent = '';
-  if (!won) { err.textContent = 'Clear the board first.'; return; }
-  if ($('botcheck').checked) return;
-
-  const mobile = normaliseMobile($('mobile').value);
-  const operator = $('operator').value;
-  if (!/^[6-9]\d{9}$/.test(mobile)) { err.textContent = 'Enter a valid 10-digit Indian mobile number that starts with 6, 7, 8 or 9.'; $('mobile').focus(); return; }
-  if (!operator) { err.textContent = 'Choose your network operator.'; $('operator').focus(); return; }
-  if (!$('consent').checked) { err.textContent = 'Tick the box to confirm how your details will be used.'; $('consent').focus(); return; }
-  if (CONFIG.ACCESS_KEY.startsWith('YOUR_')) { err.textContent = 'This form is not connected yet. The site owner needs to add a Web3Forms access key.'; return; }
-
-  const now = new Date();
-  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('https://api.web3forms.com/submit', {
+  function post(payload) {
+    return fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      /* Only these four fields are sent, plus the Web3Forms access key it requires. */
-      body: JSON.stringify({
-        access_key: CONFIG.ACCESS_KEY,
-        date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' }),
-        time: now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST',
-        mobile_number: '+91' + mobile,
-        operator: operator
-      })
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok || !j.success) throw new Error((j && j.message) || 'Request failed');
+        return j;
+      });
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
-    $('claimForm').hidden = true;
-    $('doneText').textContent = 'We have your claim for the number ending ' + mobile.slice(-4) + ' on ' + operator + '. The data is added after the claim is checked, within ' + CONFIG.DELIVERY + '.';
-    $('done').hidden = false;
-    $('done').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
-  } catch (ex) {
-    err.textContent = 'The claim did not go through. Check your connection and try again.';
-    btn.disabled = false; btn.textContent = 'Claim 1 GB';
   }
-});
+  function normaliseMobile(raw) {
+    var d = String(raw).replace(/\D/g, '');
+    if (d.length === 12 && d.indexOf('91') === 0) d = d.slice(2);
+    else if (d.length === 11 && d.charAt(0) === '0') d = d.slice(1);
+    return d;
+  }
+  function $(id) { return document.getElementById(id); }
 
-/* ---- contact form: collapsed by default, opens on click ---- */
-const cPanel = $('contactPanel'), cToggle = $('contactToggle');
-function setContact(open, focus){
-  cPanel.hidden = !open;
-  cToggle.setAttribute('aria-expanded', String(open));
-  cToggle.textContent = open ? 'Close' : 'Open form';
-  if (open && focus) { $('contact').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); setTimeout(() => $('cName').focus({ preventScroll: true }), reduce ? 0 : 350); }
-}
-cToggle.addEventListener('click', () => setContact(cPanel.hidden, false));
-document.querySelectorAll('a[href="#contact"]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); setContact(true, true); }));
-if (location.hash === '#contact') setContact(true, false);
-
-$('contactForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const err = $('cErr'); err.textContent = '';
-  if ($('cBotcheck').checked) return;
-
-  const name = $('cName').value.trim(), email = $('cEmail').value.trim(), message = $('cMessage').value.trim();
-  if (!name) { err.textContent = 'Enter your name.'; $('cName').focus(); return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = 'Enter a valid email address so we can reply.'; $('cEmail').focus(); return; }
-  if (message.length < 10) { err.textContent = 'Write a message of at least 10 characters.'; $('cMessage').focus(); return; }
-
-  const btn = $('cSubmit'); btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        access_key: CONFIG.CONTACT_KEY,
-        subject: 'New message from the ' + CONFIG.BRAND + ' contact form',
-        from_name: CONFIG.BRAND + ' contact form',
-        name: name,
-        email: email,
-        message: message
-      })
+  $('claim-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('claim-msg'); err.textContent = '';
+    if ($('k-bot').value || !cleared) return;
+    var mobile = normaliseMobile($('k-mobile').value), op = $('k-op').value;
+    if (!/^[6-9]\d{9}$/.test(mobile)) { err.textContent = 'Enter a valid 10-digit Indian mobile number that starts with 6, 7, 8 or 9.'; $('k-mobile').focus(); return; }
+    if (!op) { err.textContent = 'Choose your network operator.'; $('k-op').focus(); return; }
+    if (!$('k-ok').checked) { err.textContent = 'Tick the box to confirm how your details will be used.'; $('k-ok').focus(); return; }
+    var today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+    var claims = {};
+    try { claims = JSON.parse(localStorage.getItem('pairs-claims') || '{}'); } catch (x) {}
+    if (claims[mobile] === today) { err.textContent = 'This number already has a claim today. You can claim again tomorrow.'; return; }
+    var now = new Date(), btn = $('claim-send');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    // Only these fields are sent, plus the Web3Forms access key it requires.
+    post({
+      access_key: CLAIM_KEY,
+      date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric' }),
+      time: now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata', hourCycle: 'h23', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST',
+      mobile_number: '+91' + mobile,
+      operator: op
+    }).then(function () {
+      claims[mobile] = today;
+      try { localStorage.setItem('pairs-claims', JSON.stringify(claims)); } catch (x) {}
+      announce('Claim received.');
+      $('claim-form').hidden = true;
+      $('claim-done-text').textContent = 'We have your claim for the number ending ' + mobile.slice(-4) + ' on ' + op + '. The data is added after the claim is checked, within ' + DELIVERY + '.';
+      $('claim-done').hidden = false;
+      window.scrollTo(0, 0);
+    }).catch(function () {
+      err.textContent = 'The claim did not go through. Check your connection and try again.';
+      btn.disabled = false; btn.textContent = 'Claim 1 GB';
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.success) throw new Error(data.message || 'Request failed');
-    $('contactForm').hidden = true;
-    $('contactDone').hidden = false;
-  } catch (ex) {
-    err.textContent = 'The message did not go through. Check your connection and try again.';
-    btn.disabled = false; btn.textContent = 'Send message';
-  }
-});
+  });
 
-setup();
+  $('contact-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var err = $('contact-msg'); err.textContent = '';
+    if ($('c-bot').value) return;
+    var name = $('c-name').value.trim(), email = $('c-email').value.trim(), message = $('c-msg').value.trim();
+    if (!name) { err.textContent = 'Enter your name.'; $('c-name').focus(); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { err.textContent = 'Enter a valid email address so we can reply.'; $('c-email').focus(); return; }
+    if (message.length < 10) { err.textContent = 'Write a message of at least 10 characters.'; $('c-msg').focus(); return; }
+    var btn = $('contact-send');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    post({
+      access_key: CONTACT_KEY,
+      subject: 'New message from the ' + BRAND + ' contact form',
+      from_name: BRAND + ' contact form',
+      name: name, email: email, message: message
+    }).then(function () {
+      $('contact-form').hidden = true;
+      $('contact-done').hidden = false;
+    }).catch(function () {
+      err.textContent = 'The message did not go through. Check your connection and try again.';
+      btn.disabled = false; btn.textContent = 'Send message';
+    });
+  });
+
+  // Re-layout on the next frame, so resizing never triggers the browser's ResizeObserver loop error.
+  var layoutFrame = null;
+  function scheduleLayout() {
+    if (layoutFrame) return;
+    layoutFrame = requestAnimationFrame(function () { layoutFrame = null; layout(); });
+  }
+  window.addEventListener('resize', scheduleLayout);
+  if (window.ResizeObserver) new ResizeObserver(scheduleLayout).observe(fieldEl);
+})();
 </script>
 </body>
 </html>
